@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, PieChart, Calendar, Settings, Bot, MessageSquare, Target, Zap, CreditCard, Landmark, ChevronRight, Briefcase } from 'lucide-react';
+import { LayoutDashboard, PieChart, Calendar, Settings, Bot, MessageSquare, Target, Zap, CreditCard, Landmark, ChevronRight, Briefcase, ShieldCheck } from 'lucide-react';
 
 export default function RootLayout({
   children,
@@ -32,46 +32,40 @@ export default function RootLayout({
       </head>
       <body>
         <div className="app-container zero-scroll">
-          {/* SIDEBAR ELITE */}
-          <aside className="sidebar desktop-only">
-            <div style={{ marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-              <div style={{ width: '40px', height: '40px', background: 'var(--primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px var(--primary-glow)' }}>
-                <Zap size={24} fill="white" stroke="white" />
-              </div>
-              <div>
-                <h1 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'white', margin: 0, letterSpacing: '-0.02em' }}>
-                  NEXO <span style={{ color: 'var(--primary)' }}>FINANCEIRO</span>
-                </h1>
-                <p style={{ fontSize: '0.55rem', fontWeight: 800, color: '#64748b', margin: 0, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Gestão de Performance Operacional</p>
+          {/* SIDEBAR NEXUS STYLE */}
+          <aside className="sidebar desktop-only" style={{ background: '#0f172a' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+              <ShieldCheck size={24} color="#00a3ff" fill="#00a3ff" fillOpacity={0.2} />
+              <h1 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', margin: 0 }}>NEXO<span style={{ color: '#00a3ff' }}>FINANCEIRO</span></h1>
+            </div>
+            <div className="sidebar-subtitle">GESTÃO DE PERFORMANCE OPERACIONAL</div>
+
+            <div className="status-box">
+              <span className="status-label">STATUS DO SISTEMA</span>
+              <div className="status-value" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                SINCRONIZADO E ATIVO
               </div>
             </div>
 
-            <div className="elite-pulse" style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '2rem' }}>
-              <div style={{ fontSize: '0.55rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.5rem' }}>STATUS DO SISTEMA</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <div style={{ width: '8px', height: '8px', background: 'var(--primary)', borderRadius: '50%', boxShadow: '0 0 10px var(--primary)' }}></div>
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'white' }}>SINCRONIZADO E ATIVO</span>
-              </div>
-            </div>
-
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
-              {navItems.map((item) => {
-                const isActive = pathname === item.href;
-                const Icon = item.icon;
-                return (
-                  <Link key={item.href} href={item.href} className={`nav-link ${isActive ? 'active' : ''}`}>
-                    <Icon size={20} />
-                    <span>{item.label}</span>
-                    {isActive && <ChevronRight size={14} style={{ marginLeft: 'auto', opacity: 0.5 }} />}
-                  </Link>
-                );
-              })}
-              
-              <Link href="/chat" className={`nav-link ${pathname === '/chat' ? 'active' : ''}`} style={{ marginTop: 'auto', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
-                <MessageSquare size={20} className="text-neon-green" />
-                <span className="text-neon-green" style={{ fontWeight: 800 }}>Perguntar ao Nexo</span>
-              </Link>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1 }}>
+              <Link href="/" className={`nav-link ${pathname === '/' ? 'active' : ''}`}><LayoutDashboard size={18} /> Dashboard</Link>
+              <Link href="/transicoes" className={`nav-link ${pathname === '/transicoes' ? 'active' : ''}`}><PieChart size={18} /> Transações</Link>
+              <Link href="/fixas" className={`nav-link ${pathname === '/fixas' ? 'active' : ''}`}><Target size={18} /> Despesas Fixas</Link>
+              <Link href="/coral" className={`nav-link ${pathname === '/coral' ? 'active' : ''}`}><Briefcase size={18} /> Despesas Coral</Link>
+              <Link href="/contas" className={`nav-link ${pathname === '/contas' ? 'active' : ''}`}><Landmark size={18} /> Contas</Link>
+              <Link href="/cartoes" className={`nav-link ${pathname === '/cartoes' ? 'active' : ''}`}><CreditCard size={18} /> Cartões</Link>
+              <Link href="/agenda" className={`nav-link ${pathname === '/agenda' ? 'active' : ''}`}><Calendar size={18} /> Agenda</Link>
+              <Link href="/settings" className={`nav-link ${pathname === '/settings' ? 'active' : ''}`}><Settings size={18} /> Configurações</Link>
             </nav>
+
+            <Link href="/chat" className="glass-card" style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginTop: '1rem', cursor: 'pointer', display: 'block', textDecoration: 'none', color: 'inherit' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', fontSize: '0.8rem', fontWeight: 700 }}>
+                <div style={{ width: '24px', height: '24px', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MessageSquare size={14} color="#10B981" />
+                </div>
+                Perguntar ao Nexo
+              </div>
+            </Link>
           </aside>
           
           <main className="main-content">
