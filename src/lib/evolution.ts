@@ -8,7 +8,7 @@ import { supabase } from './supabase';
 
 const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || '';
 const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || '';
-const EVOLUTION_INSTANCE = process.env.EVOLUTION_INSTANCE || 'nexofinanceiro';
+const EVOLUTION_INSTANCE = process.env.EVOLUTION_INSTANCE || 'nexofinanceiro_bot';
 
 export const evolutionService = {
   /**
