@@ -31,63 +31,78 @@ export default function DashboardNexusFinal() {
     recentTransactions: [],
     accounts: []
   });
+  const [allTransactions, setAllTransactions] = useState<any[]>([]);
   const [filter, setFilter] = useState('Todos');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      
-      // 1. Fetch Totals
       const { data: trans } = await supabase
         .from('transacoes')
         .select('tipo, valor, categoria, descricao, created_at')
         .order('created_at', { ascending: false });
 
-      if (trans && trans.length > 0) {
-        const entradas = trans.filter(t => t.tipo === 'entrada').reduce((acc, t) => acc + (Number(t.valor) || 0), 0);
-        const saidas = trans.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
-        const saldo = entradas - saidas;
-
-        // 2. Fetch Top Despesas (Grouped)
-        const despesasMap: Record<string, number> = {};
-        trans.filter(t => t.tipo === 'saida').forEach(t => {
-          const val = Math.abs(Number(t.valor)) || 0;
-          despesasMap[t.categoria || 'Outros'] = (despesasMap[t.categoria || 'Outros'] || 0) + val;
-        });
-        const topDespesas = Object.entries(despesasMap)
-          .map(([name, value]) => ({ name, value }))
-          .sort((a,b) => b.value - a.value)
-          .slice(0, 5);
-        
-        const totalSaidas = saidas || 1;
-        const topDespesasPerc = topDespesas.map((d, i) => ({
-          ...d,
-          percent: ((d.value / totalSaidas) * 100).toFixed(1),
-          color: ['#f43f5e', '#fb7185', '#fda4af', '#0ea5e9', '#38bdf8'][i % 5]
-        }));
-
-        // 3. Recent Transactions
-        const recentTransactions = trans.slice(0, 4);
-
-        setData({
-          saldo,
-          entradas,
-          saidas,
-          topDespesas: topDespesasPerc as any,
-          recentTransactions,
-          accounts: [
-            { n: 'CAIXXXA', v: entradas * 0.4, s: '#10B981' }, // Dummy logic for accounts for now
-            { n: 'BUBANK', v: -saidas * 0.2, s: '#f43f5e' },
-            { n: 'VISA', v: -saidas * 0.1, s: '#f43f5e' }
-          ]
-        });
-      }
+      if (trans) setAllTransactions(trans);
       setLoading(false);
     }
-
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (allTransactions.length === 0) return;
+
+    const entradas = allTransactions.filter(t => t.tipo === 'entrada').reduce((acc, t) => acc + (Number(t.valor) || 0), 0);
+    const saidas = allTransactions.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
+    const saldo = entradas - saidas;
+
+    const despesasMap: Record<string, number> = {};
+    allTransactions.filter(t => t.tipo === 'saida').forEach(t => {
+      const val = Math.abs(Number(t.valor)) || 0;
+      despesasMap[t.categoria || 'Outros'] = (despesasMap[t.categoria || 'Outros'] || 0) + val;
+    });
+
+    const topDespesas = Object.entries(despesasMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a,b) => b.value - a.value)
+      .slice(0, 5);
+    
+    const totalSaidas = saidas || 1;
+    const topDespesasPerc = topDespesas.map((d, i) => ({
+      ...d,
+      percent: ((d.value / totalSaidas) * 100).toFixed(1),
+      color: ['#f43f5e', '#fb7185', '#fda4af', '#0ea5e9', '#38bdf8'][i % 5]
+    }));
+
+    // Dynamic Filter Logic for "accounts" section
+    let accountsList = [];
+    if (filter === 'Todos') {
+      accountsList = [
+        { n: 'CAIXXXA', v: entradas * 0.4, s: '#10B981' },
+        { n: 'BUBANK', v: -saidas * 0.2, s: '#f43f5e' },
+        { n: 'VISA', v: -saidas * 0.1, s: '#f43f5e' }
+      ];
+    } else {
+      // Filter records by category
+      const filtered = allTransactions.filter(t => 
+        t.categoria?.toLowerCase().includes(filter.toLowerCase())
+      );
+      accountsList = filtered.slice(0, 10).map(t => ({
+        n: t.descricao || t.categoria,
+        v: t.tipo === 'entrada' ? t.valor : -t.valor,
+        s: t.tipo === 'entrada' ? '#10B981' : '#f43f5e'
+      }));
+    }
+
+    setData({
+      saldo,
+      entradas,
+      saidas,
+      topDespesas: topDespesasPerc as any,
+      recentTransactions: allTransactions.slice(0, 4),
+      accounts: accountsList
+    });
+  }, [allTransactions, filter]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', height: '100%' }}>
