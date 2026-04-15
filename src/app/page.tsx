@@ -1,33 +1,95 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { 
   Home, Coffee, CreditCard, Truck, 
+  ArrowUpCircle, ArrowDownCircle, History, Landmark, 
+  Filter, CheckSquare
 } from 'lucide-react';
 import { 
-  BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, 
+  Tooltip, ResponsiveContainer, 
   Cell, PieChart, Pie, LineChart, Line
 } from 'recharts';
+import { supabase } from '@/lib/supabase';
 
-const topDespesas = [
-  { name: 'Supermercado', value: 36.30, color: '#f43f5e' },
-  { name: 'Cartão de crédito', value: 18.16, color: '#fb7185' },
-  { name: 'Plano de saúde', value: 12.12, color: '#fda4af' },
-  { name: 'Prestação da casa', value: 15.18, color: '#0ea5e9' },
-  { name: 'Presentes', value: 35.18, color: '#38bdf8' },
-];
-
-const sparklineData = Array.from({ length: 20 }, (_, i) => ({ value: 30 + Math.random() * 40 + (i > 10 ? Math.sin(i) * 10 : 0) }));
+// Mock Sparkline Data (will use real trend in next iteration)
+const sparklineData = Array.from({ length: 20 }, (_, i) => ({ value: 30 + Math.random() * 40 }));
 
 export default function DashboardNexusFinal() {
+  const [data, setData] = useState({
+    saldo: 0,
+    entradas: 0,
+    saidas: 0,
+    topDespesas: [],
+    recentTransactions: [],
+    accounts: []
+  });
+  const [filter, setFilter] = useState('Todos');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      
+      // 1. Fetch Totals
+      const { data: trans } = await supabase
+        .from('transacoes')
+        .select('tipo, valor, categoria, descricao, created_at')
+        .order('created_at', { ascending: false });
+
+      if (trans) {
+        const entradas = trans.filter(t => t.tipo === 'entrada').reduce((acc, t) => acc + (t.valor || 0), 0);
+        const saidas = trans.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + (t.valor || 0), 0);
+        const saldo = entradas - saidas;
+
+        // 2. Fetch Top Despesas (Grouped)
+        const despesasMap: Record<string, number> = {};
+        trans.filter(t => t.tipo === 'saida').forEach(t => {
+          despesasMap[t.categoria || 'Outros'] = (despesasMap[t.categoria || 'Outros'] || 0) + (t.valor || 0);
+        });
+        const topDespesas = Object.entries(despesasMap)
+          .map(([name, value]) => ({ name, value }))
+          .sort((a,b) => b.value - a.value)
+          .slice(0, 5);
+        
+        const totalSaidas = saidas || 1;
+        const topDespesasPerc = topDespesas.map((d, i) => ({
+          ...d,
+          percent: ((d.value / totalSaidas) * 100).toFixed(1),
+          color: ['#f43f5e', '#fb7185', '#fda4af', '#0ea5e9', '#38bdf8'][i % 5]
+        }));
+
+        // 3. Recent Transactions
+        const recentTransactions = trans.slice(0, 4);
+
+        setData({
+          saldo,
+          entradas,
+          saidas,
+          topDespesas: topDespesasPerc as any,
+          recentTransactions,
+          accounts: [
+            { n: 'CAIXXXA', v: entradas * 0.4, s: '#10B981' }, // Dummy logic for accounts for now
+            { n: 'BUBANK', v: -saidas * 0.2, s: '#f43f5e' },
+            { n: 'VISA', v: -saidas * 0.1, s: '#f43f5e' }
+          ]
+        });
+      }
+      setLoading(false);
+    }
+
+    fetchData();
+  }, []);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', height: '100%' }}>
       {/* TOP KPI ROW */}
       <div className="dashboard-grid" style={{ gridTemplateColumns: '1.2fr 1fr 1fr', gap: '1rem', marginBottom: 0 }}>
         {/* SALDO */}
-        <div className="glass-card kpi-card-saldo" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '0.9rem', fontWeight: 600, opacity: 0.9 }}>Saldo</span>
+        <div className="glass-card kpi-card-saldo" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '0.9rem', fontWeight: 600, opacity: 0.9 }}>Saldo Total</span>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 800 }}>R$ 4.216</div>
+            <div style={{ fontSize: '2.5rem', fontWeight: 800 }}>R$ {data.saldo.toLocaleString('pt-BR')}</div>
             <div style={{ height: '40px', width: '120px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={sparklineData}><Line type="monotone" dataKey="value" stroke="white" strokeWidth={2} dot={false} /></LineChart>
@@ -37,10 +99,10 @@ export default function DashboardNexusFinal() {
         </div>
 
         {/* ENTRADAS */}
-        <div className="glass-card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column' }}>
+        <div className="glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>Entradas</span>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flex: 1 }}>
-            <div style={{ fontSize: '2rem', fontWeight: 800 }}>R$ 20.300</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#0ea5e9' }}>R$ {data.entradas.toLocaleString('pt-BR')}</div>
             <div style={{ height: '30px', width: '80px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={sparklineData}><Line type="monotone" dataKey="value" stroke="#0ea5e9" strokeWidth={2} dot={false} /></LineChart>
@@ -49,14 +111,16 @@ export default function DashboardNexusFinal() {
           </div>
         </div>
 
-        {/* DESPESAS */}
-        <div className="glass-card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column' }}>
+        {/* SAÍDAS */}
+        <div className="glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>Despesas</span>
-            <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 800 }}>79,23%</span>
+            <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>Saídas</span>
+            <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 800 }}>
+              {data.entradas > 0 ? ((data.saidas / data.entradas) * 100).toFixed(1) : '0'}%
+            </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flex: 1 }}>
-            <div style={{ fontSize: '2rem', fontWeight: 800 }}>R$ 16.084</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#f43f5e' }}>R$ {data.saidas.toLocaleString('pt-BR')}</div>
             <div style={{ height: '30px', width: '80px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={sparklineData}><Line type="monotone" dataKey="value" stroke="#f43f5e" strokeWidth={2} dot={false} /></LineChart>
@@ -72,24 +136,30 @@ export default function DashboardNexusFinal() {
         <div className="glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
           <div className="elite-filter-group">
             <label className="elite-filter-label" style={{ fontSize: '0.65rem' }}>CONTA</label>
-            <select className="elite-select" style={{ fontSize: '0.75rem', padding: '0.5rem' }}><option>Todos</option></select>
+            <select 
+              className="elite-select" 
+              style={{ fontSize: '0.75rem', padding: '0.5rem' }}
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            >
+              <option value="Todos">Todos</option>
+              <option value="Coral">Despesa Coral</option>
+              <option value="Fixa">Despesa Fixa</option>
+              <option value="Cartão">Cartão</option>
+            </select>
           </div>
 
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: '#64748b', fontWeight: 700, marginBottom: '0.5rem' }}>
-              <span>CONTAS</span>
-              <span>SALDO</span>
+              <span>{filter === 'Todos' ? 'CONTAS' : 'REGISTROS'}</span>
+              <span>VALOR</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              {[
-                { n: 'CAIXXXA', v: 'R$ 6.616', s: '#10B981' },
-                { n: 'BUBANK', v: '-R$ 9.900', s: '#f43f5e' },
-                { n: 'VISA', v: '-R$ 1.500', s: '#f43f5e' }
-              ].map((acc, i) => (
+              {data.accounts.map((acc: any, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', fontWeight: 600 }}>
                   <span>{acc.n}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                    <span>{acc.v}</span>
+                    <span>{acc.v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: acc.s }}></div>
                   </div>
                 </div>
@@ -106,25 +176,14 @@ export default function DashboardNexusFinal() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
-              <div className="elite-filter-group">
-                <label className="elite-filter-label" style={{ fontSize: '0.65rem' }}>ANO</label>
-                <select className="elite-select" style={{ fontSize: '0.75rem', padding: '0.4rem' }}><option>2023</option></select>
-              </div>
-              <div className="elite-filter-group">
-                <label className="elite-filter-label" style={{ fontSize: '0.65rem' }}>MÊS</label>
-                <select className="elite-select" style={{ fontSize: '0.75rem', padding: '0.4rem' }}><option>Todos</option></select>
-              </div>
-            </div>
-
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', cursor: 'pointer', justifyContent: 'center' }}>
-              <div style={{ width: '12px', height: '12px', border: '1px solid #64748b', borderRadius: '3px' }}></div>
+              <CheckSquare size={14} color="#64748b" />
               <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b' }}>Limpar filtros</span>
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: CHARTS & CARDS */}
+        {/* RIGHT COLUMN: CHARTS & RECENT */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: 0 }}>
           {/* CHART CARD */}
           <div className="glass-card" style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
@@ -133,8 +192,8 @@ export default function DashboardNexusFinal() {
               <div style={{ width: '45%', height: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={topDespesas} innerRadius="65%" outerRadius="90%" paddingAngle={4} dataKey="value">
-                      {topDespesas.map((e, index) => <Cell key={index} fill={e.color} />)}
+                    <Pie data={data.topDespesas} innerRadius="65%" outerRadius="90%" paddingAngle={4} dataKey="value">
+                      {data.topDespesas.map((e: any, index) => <Cell key={index} fill={e.color} />)}
                     </Pie>
                     <Tooltip contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '10px' }} />
                   </PieChart>
@@ -142,35 +201,39 @@ export default function DashboardNexusFinal() {
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem', paddingLeft: '1.5rem' }}>
                 <span className="elite-filter-label" style={{ fontSize: '0.55rem' }}>CATEGORIA</span>
-                {topDespesas.sort((a,b) => b.value - a.value).map((item, i) => (
+                {data.topDespesas.map((item: any, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.7rem', fontWeight: 600 }}>
                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: item.color }}></div>
                     <span style={{ color: '#94a3b8', flex: 1 }}>{item.name}</span>
-                    <span>{item.value}%</span>
+                    <span>{item.percent}%</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* CATEGORY CARDS GRID */}
-          <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.8rem', marginBottom: 0 }}>
-            {[
-              { l: 'Moradia', v: '2.929', i: Home },
-              { l: 'Lazer', v: '900', i: Coffee },
-              { l: 'Cartão', v: '1.800', i: CreditCard },
-              { l: 'Transporte', v: '1.500', i: Truck },
-            ].map((cat, i) => (
-              <div key={i} className="glass-card" style={{ padding: '0.8rem', display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '3px solid #f97316' }}>
-                <div style={{ width: '36px', height: '36px', background: 'rgba(249, 115, 22, 0.15)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <cat.i size={18} color="#f97316" />
+          {/* ÚLTIMOS REGISTROS (GRID) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white' }}>Últimos Registros</h3>
+            <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.8rem', marginBottom: 0 }}>
+              {data.recentTransactions.map((t: any, i) => (
+                <div key={i} className="glass-card" style={{ padding: '0.8rem', display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: `3px solid ${t.tipo === 'entrada' ? '#0ea5e9' : '#f43f5e'}` }}>
+                  <div style={{ width: '36px', height: '36px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {t.tipo === 'entrada' ? <ArrowUpCircle size={18} color="#0ea5e9" /> : <ArrowDownCircle size={18} color="#f43f5e" />}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>{t.categoria || 'Geral'}</div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '120px' }}>{t.descricao}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '1rem', fontWeight: 800, color: t.tipo === 'entrada' ? '#0ea5e9' : '#f43f5e' }}>
+                      {t.tipo === 'entrada' ? '+' : '-'} R$ {t.valor.toLocaleString('pt-BR')}
+                    </div>
+                    <div style={{ fontSize: '0.55rem', color: '#64748b' }}>{new Date(t.created_at).toLocaleDateString()}</div>
+                  </div>
                 </div>
-                <div>
-                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>{cat.l}</div>
-                  <div style={{ fontSize: '1.3rem', fontWeight: 800 }}>R$ {cat.v}</div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
