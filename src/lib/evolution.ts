@@ -3,6 +3,8 @@
  * Substitui o Twilio para envio de mensagens WhatsApp.
  * Sem limite diário, sem custo, usa seu próprio número.
  */
+import { supabase } from './supabase';
+
 
 const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || '';
 const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || '';
@@ -43,6 +45,12 @@ export const evolutionService = {
 
       if (!response.ok) {
         console.error('[EVOLUTION] ❌ Erro ao enviar:', result);
+        await supabase.from('logs').insert({
+          numero_whatsapp: 'ERROR_SENDER',
+          mensagem_entrada: `Instance: ${EVOLUTION_INSTANCE} | To: ${numero}`,
+          resposta_enviada: `Error: ${JSON.stringify(result)}`,
+          tipo_acao: 'debug'
+        });
         return false;
       }
 
