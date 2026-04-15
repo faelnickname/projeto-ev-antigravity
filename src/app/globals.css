@@ -433,7 +433,7 @@ a {
   }
 
   .app-container {
-    flex-direction: column;
+    flex-direction: row !important;
   }
 
   .dashboard-grid {
