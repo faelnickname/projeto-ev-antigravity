@@ -183,7 +183,7 @@ FIXAS: ${fixas.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma
         categoria: d.categoria || 'Outros',
         subcategoria: d.subcategoria,
         valor: d.tipo === 'inc' ? Math.abs(d.valor) : -Math.abs(d.valor),
-        tipo: d.tipo === 'inc' ? 'inc' : 'exp',
+        tipo: d.tipo === 'inc' ? 'entrada' : 'saida',
         id_whatsapp: FINAL_DB_ID,
         status: 'confirmado'
       });

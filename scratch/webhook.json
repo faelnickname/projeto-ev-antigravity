@@ -1,5 +1,7 @@
 {
-  "enabled": true,
-  "url": "https://projeto-ev-antigravity.vercel.app/api/webhook/evolution",
-  "events": ["MESSAGES_UPSERT"]
+  "webhook": {
+    "url": "https://projetoev.com.br/api/webhook/evolution",
+    "enabled": true,
+    "events": ["MESSAGES_UPSERT"]
+  }
 }

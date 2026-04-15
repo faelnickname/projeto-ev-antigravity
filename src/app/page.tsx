@@ -37,15 +37,16 @@ export default function DashboardNexusFinal() {
         .select('tipo, valor, categoria, descricao, created_at')
         .order('created_at', { ascending: false });
 
-      if (trans) {
-        const entradas = trans.filter(t => t.tipo === 'entrada').reduce((acc, t) => acc + (t.valor || 0), 0);
-        const saidas = trans.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + (t.valor || 0), 0);
+      if (trans && trans.length > 0) {
+        const entradas = trans.filter(t => t.tipo === 'entrada').reduce((acc, t) => acc + (Number(t.valor) || 0), 0);
+        const saidas = trans.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
         const saldo = entradas - saidas;
 
         // 2. Fetch Top Despesas (Grouped)
         const despesasMap: Record<string, number> = {};
         trans.filter(t => t.tipo === 'saida').forEach(t => {
-          despesasMap[t.categoria || 'Outros'] = (despesasMap[t.categoria || 'Outros'] || 0) + (t.valor || 0);
+          const val = Math.abs(Number(t.valor)) || 0;
+          despesasMap[t.categoria || 'Outros'] = (despesasMap[t.categoria || 'Outros'] || 0) + val;
         });
         const topDespesas = Object.entries(despesasMap)
           .map(([name, value]) => ({ name, value }))
