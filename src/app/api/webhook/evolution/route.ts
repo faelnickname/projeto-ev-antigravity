@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { processarMensagemAssistente } from '@/lib/ai';
+import { processarMensagemAssistente, transcreverAudio, analisarImagem } from '@/lib/ai';
 import { supabase } from '@/lib/supabase';
 import { verificarDuplicata, verificarRateLimit } from '@/lib/rateLimit';
 import { evolutionService } from '@/lib/evolution';
@@ -75,11 +75,56 @@ export async function POST(request: NextRequest) {
       return new Response('ok', { status: 200 });
     }
 
-    const bodyText: string = (
+    let bodyText: string = (
       message?.message?.conversation ||
       message?.message?.extendedTextMessage?.text ||
       ''
     ).trim();
+
+    // SUPORTE PARA ÁUDIO
+    if (!bodyText && message?.message?.audioMessage) {
+      log('INFO', 'Detectado ÁUDIO. Transcrevendo...');
+      try {
+        const res = await fetch(`${process.env.EVOLUTION_API_URL}/chat/getBase64FromMediaMessage/${body.instance}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': process.env.EVOLUTION_API_KEY || '' },
+          body: JSON.stringify({ message: message })
+        });
+        const mediaData = await res.json();
+        if (mediaData.base64) {
+          const buffer = Buffer.from(mediaData.base64, 'base64');
+          const transcription = await transcreverAudio(buffer);
+          if (transcription) {
+            bodyText = transcription;
+            log('INFO', `Transcrição: "${bodyText}"`);
+          }
+        }
+      } catch (err) {
+        log('ERROR', 'Erro ao transcrever áudio');
+      }
+    }
+
+    // SUPORTE PARA IMAGEM (VISION)
+    if (!bodyText && message?.message?.imageMessage) {
+      log('INFO', 'Detectada IMAGEM. Analisando...');
+      try {
+        const res = await fetch(`${process.env.EVOLUTION_API_URL}/chat/getBase64FromMediaMessage/${body.instance}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': process.env.EVOLUTION_API_KEY || '' },
+          body: JSON.stringify({ message: message })
+        });
+        const mediaData = await res.json();
+        if (mediaData.base64) {
+          const visionData = await analisarImagem(mediaData.base64);
+          if (visionData && visionData.valor) {
+            bodyText = `Registre pelo comprovante: ${visionData.descricao || 'Compra'} valor R$ ${visionData.valor} categoria ${visionData.categoria || 'Outros'}`;
+            log('INFO', `Visão: "${bodyText}"`);
+          }
+        }
+      } catch (err) {
+        log('ERROR', 'Erro ao analisar imagem');
+      }
+    }
 
     log('INFO', `DM de: ${senderNumber} | Msg: "${bodyText}"`);
 
