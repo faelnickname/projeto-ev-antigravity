@@ -71,8 +71,7 @@ export default function DashboardNexusFinal() {
 
     const topDespesas = Object.entries(despesasMap)
       .map(([name, value]) => ({ name, value }))
-      .sort((a,b) => b.value - a.value)
-      .slice(0, 5);
+      .sort((a,b) => b.value - a.value);
     
     // Use the actual total of filtered outgoings for percentage
     const filteredSaidas = filteredForChart.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
@@ -174,6 +173,7 @@ export default function DashboardNexusFinal() {
               <option value="Coral">Despesa Coral</option>
               <option value="Fixa">Despesa Fixa</option>
               <option value="Cartão">Cartão</option>
+              <option value="Lene">Cartão Lene</option>
             </select>
           </div>
 
@@ -201,24 +201,24 @@ export default function DashboardNexusFinal() {
           {/* CHART CARD */}
           <div className="glass-card" style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white', marginBottom: '1rem' }}>
-              {filter === 'Selecionar Despesa' ? 'Top 5 Despesas por categoria' : `Detalhamento: ${filter}`}
+              {filter === 'Selecionar Despesa' ? 'Detalhamento' : `Detalhamento: ${filter}`}
             </h3>
             <div style={{ display: 'flex', alignItems: 'center', flex: 1, minHeight: 0 }}>
-              <div style={{ width: '45%', height: '100%' }}>
+              <div style={{ width: '40%', height: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={data.topDespesas} innerRadius="65%" outerRadius="90%" paddingAngle={4} dataKey="value">
+                    <Pie data={data.topDespesas.slice(0, 5)} innerRadius="65%" outerRadius="90%" paddingAngle={4} dataKey="value">
                       {data.topDespesas.map((e: any, index) => <Cell key={index} fill={e.color} />)}
                     </Pie>
                     <Tooltip contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '10px' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem', paddingLeft: '1.5rem' }}>
-                <span className="elite-filter-label" style={{ fontSize: '0.55rem' }}>CATEGORIA</span>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem', paddingLeft: '1.5rem', overflowY: 'auto', maxHeight: '180px' }}>
+                <span className="elite-filter-label" style={{ fontSize: '0.55rem' }}>{filter === 'Selecionar Despesa' ? 'CATEGORIA' : 'DESPESA'}</span>
                 {data.topDespesas.map((item: any, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.7rem', fontWeight: 600 }}>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: item.color }}></div>
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: item.color || '#334155' }}></div>
                     <span style={{ color: '#94a3b8', flex: 1 }}>{item.name}</span>
                     <span>{item.percent}%</span>
                   </div>
