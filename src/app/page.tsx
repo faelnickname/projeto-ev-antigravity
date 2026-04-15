@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { 
   Home, Coffee, CreditCard, Truck, 
-  ArrowUpCircle, ArrowDownCircle, History, Landmark, 
-  Filter, CheckSquare
+  ArrowUpCircle, ArrowDownCircle, Landmark, 
+  CheckSquare
 } from 'lucide-react';
 import { 
   Tooltip, ResponsiveContainer, 

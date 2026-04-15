@@ -1,7 +1,0 @@
-{
-  "webhook": {
-    "url": "https://projetoev.com.br/api/webhook/evolution",
-    "enabled": true,
-    "events": ["MESSAGES_UPSERT"]
-  }
-}

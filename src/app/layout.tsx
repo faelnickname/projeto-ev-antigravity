@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, PieChart, Calendar, Settings, Bot, MessageSquare, Target, Zap, CreditCard, Landmark, ChevronRight, Briefcase, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, PieChart, Calendar, Settings, MessageSquare, Target, CreditCard, Landmark, Briefcase, ShieldCheck } from 'lucide-react';
 
 export default function RootLayout({
   children,
