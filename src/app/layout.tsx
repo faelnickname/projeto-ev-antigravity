@@ -1,6 +1,5 @@
 "use client";
 
-import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -26,10 +25,6 @@ export default function RootLayout({
 
   return (
     <html lang="pt-BR">
-      <head>
-        <title>Nexo Financeiro | Gestão de Elite</title>
-        <meta name="description" content="Centro de Comando Financeiro com IA" />
-      </head>
       <body>
         <div className="app-container zero-scroll">
           {/* SIDEBAR NEXUS STYLE */}
