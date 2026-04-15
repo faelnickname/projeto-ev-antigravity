@@ -84,8 +84,9 @@ export default function DashboardNexusFinal() {
     
     if (filtered.length > 0) {
       const dates = filtered.map(t => new Date(t.created_at).getTime()).sort((a,b) => a - b);
-      start = new Date(dates[0]).toLocaleDateString('pt-BR');
-      end = new Date(dates[dates.length - 1]).toLocaleDateString('pt-BR');
+      const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+      start = new Date(dates[0]).toLocaleString('pt-BR', options);
+      end = new Date(dates[dates.length - 1]).toLocaleString('pt-BR', options);
     }
 
     setData({
@@ -229,9 +230,11 @@ export default function DashboardNexusFinal() {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '1rem', fontWeight: 800, color: t.tipo === 'entrada' ? '#0ea5e9' : '#f43f5e' }}>
-                      {t.tipo === 'entrada' ? '+' : '-'} R$ {t.valor.toLocaleString('pt-BR')}
+                      {t.tipo === 'entrada' ? '+' : '-'} R$ {Number(t.valor).toLocaleString('pt-BR')}
                     </div>
-                    <div style={{ fontSize: '0.55rem', color: '#64748b' }}>{new Date(t.created_at).toLocaleDateString()}</div>
+                    <div style={{ fontSize: '0.55rem', color: '#64748b' }}>
+                      {new Date(t.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    </div>
                   </div>
                 </div>
               ))}
