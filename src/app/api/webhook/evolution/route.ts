@@ -198,8 +198,17 @@ FIXAS: ${fixas.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma
       tipo_acao: ia.intencao
     });
 
+    // Verifica se deve adicionar o link da plataforma
+    let respostaFinal = ia.resposta;
+    const querAcesso = /painel|plataforma|acender|link|ver os dados|site|dashboard/i.test(bodyText);
+    const isAnalise = ia.intencao === 'pergunta' || ia.intencao === 'consulta';
+
+    if (querAcesso || isAnalise) {
+      respostaFinal += `\n\n🔗 *Acesso à Plataforma:* https://projetoev.com.br`;
+    }
+
     // Responde diretamente na DM do usuário
-    await evolutionService.sendMessage(remoteJid, ia.resposta);
+    await evolutionService.sendMessage(remoteJid, respostaFinal);
     log('INFO', '✅ Resposta enviada com sucesso!');
 
     return new Response('ok', { status: 200 });
