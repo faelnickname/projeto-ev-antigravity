@@ -56,10 +56,17 @@ export default function DashboardNexusFinal() {
     const saidas = allTransactions.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
     const saldo = entradas - saidas;
 
+    // 2. Fetch Top Despesas (Grouped)
     const despesasMap: Record<string, number> = {};
-    allTransactions.filter(t => t.tipo === 'saida').forEach(t => {
+    const filteredForChart = filter === 'Selecionar Despesa' 
+      ? allTransactions 
+      : allTransactions.filter(t => t.categoria?.toLowerCase().includes(filter.toLowerCase()));
+
+    filteredForChart.filter(t => t.tipo === 'saida').forEach(t => {
       const val = Math.abs(Number(t.valor)) || 0;
-      despesasMap[t.categoria || 'Outros'] = (despesasMap[t.categoria || 'Outros'] || 0) + val;
+      // If filtering by specific category, group by description. Else group by category.
+      const key = filter === 'Selecionar Despesa' ? (t.categoria || 'Outros') : (t.descricao || 'Sem descrição');
+      despesasMap[key] = (despesasMap[key] || 0) + val;
     });
 
     const topDespesas = Object.entries(despesasMap)
@@ -67,10 +74,13 @@ export default function DashboardNexusFinal() {
       .sort((a,b) => b.value - a.value)
       .slice(0, 5);
     
-    const totalSaidas = saidas || 1;
+    // Use the actual total of filtered outgoings for percentage
+    const filteredSaidas = filteredForChart.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
+    const totalForPerc = filteredSaidas || 1;
+
     const topDespesasPerc = topDespesas.map((d, i) => ({
       ...d,
-      percent: ((d.value / totalSaidas) * 100).toFixed(1),
+      percent: ((d.value / totalForPerc) * 100).toFixed(1),
       color: ['#f43f5e', '#fb7185', '#fda4af', '#0ea5e9', '#38bdf8'][i % 5]
     }));
 
@@ -190,7 +200,9 @@ export default function DashboardNexusFinal() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: 0 }}>
           {/* CHART CARD */}
           <div className="glass-card" style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white', marginBottom: '1rem' }}>Top 5 Despesas por categoria</h3>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white', marginBottom: '1rem' }}>
+              {filter === 'Selecionar Despesa' ? 'Top 5 Despesas por categoria' : `Detalhamento: ${filter}`}
+            </h3>
             <div style={{ display: 'flex', alignItems: 'center', flex: 1, minHeight: 0 }}>
               <div style={{ width: '45%', height: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
