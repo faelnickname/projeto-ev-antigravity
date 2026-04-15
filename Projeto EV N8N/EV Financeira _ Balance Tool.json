@@ -1,0 +1,175 @@
+{
+  "name": "EV Financeira | Balance Tool",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "start_date"
+            },
+            {
+              "name": "end_date"
+            },
+            {
+              "name": "tenant_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3ab30cf7-6716-4d0c-a8c1-128961bb353d",
+      "name": "Input"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "transacoes",
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_whatsapp",
+              "condition": "eq",
+              "keyValue": "={{ $json.tenant_id.replace(/\\D/g, '') }}"
+            },
+            {
+              "keyName": "created_at",
+              "condition": "gte",
+              "keyValue": "={{ $json.start_date }}"
+            },
+            {
+              "keyName": "created_at",
+              "condition": "lte",
+              "keyValue": "={{ $json.end_date }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        192,
+        0
+      ],
+      "id": "da92769e-5f12-4b51-90bc-25e88f54b8d1",
+      "name": "Consultar Saldos",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "uW32m63kpcW6LTni",
+          "name": "Supabase Projeto EV"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "balances",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        352,
+        0
+      ],
+      "id": "a57dcc2d-dbde-4d63-b006-a5fc4145195c",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "total-calc",
+              "name": "total",
+              "value": "={{ $json.balances.map(it => parseFloat(it.valor) || 0).reduce((a, b) => a + b, 0) }}",
+              "type": "number"
+            },
+            {
+              "id": "4146656a-e3da-4767-97e9-7586230125aa",
+              "name": "data formatada",
+              "value": "={{ $json.balances.map(item => new Date(item.created_at).toLocaleString('pt-BR')) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        528,
+        0
+      ],
+      "id": "da75db63-1713-4b56-aa70-3080ac44c99f",
+      "name": "Calculate"
+    }
+  ],
+  "pinData": {
+    "Input": [
+      {
+        "json": {
+          "start_date": "2026-04-01",
+          "end_date": "2026-04-11",
+          "tenant_id": "ID_DO_SEU_TENANT"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Input": {
+      "main": [
+        [
+          {
+            "node": "Consultar Saldos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar Saldos": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Calculate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c98dbe63-4d83-456c-9c0a-63121e27a9bc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "06665356645721433572a8968cdef103e4178eb63ddec7e800a81175fa1f99ff"
+  },
+  "id": "heKYLW4AkwPh9wkY",
+  "tags": []
+}

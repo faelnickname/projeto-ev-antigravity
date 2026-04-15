@@ -1,0 +1,463 @@
+{
+  "name": "EV Financeira | AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-financial",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        -80
+      ],
+      "id": "48bd0f37-2b03-45e8-91c9-1cd2b525597a",
+      "name": "Webhook Evolution",
+      "webhookId": "42b123a2-461d-4545-86f2-3ce82f40e234"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "contact-id",
+              "name": "contact.id",
+              "value": "={{ $json.key?.remoteJid?.split('@')[0] || $json.from?.split('@')[0] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "chat-text",
+              "name": "chat.text",
+              "value": "={{ $json.message?.conversation || $json.message?.extendedTextMessage?.text || $json.data?.message?.conversation || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "chat-id",
+              "name": "chat.id",
+              "value": "={{ $json.key?.remoteJid || $json.from || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -672,
+        -80
+      ],
+      "id": "b39bc4da-ae31-4a71-a393-93d17a766a35",
+      "name": "Normalize"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chat.text }}",
+        "options": {
+          "systemMessage": "=### 🚨 REGRAS DE OURO (NUNCA QUEBRE):\\n1. **ZERO HALLUCINATION**: Se não encontrar dados reais no banco, diga que não há registros. NUNCA invente transações, valores ou exemplos.\\n2. **SEM LINKS EXTERNOS**: É estritamente proibido gerar ou enviar links do QuickChart ou qualquer outra URL. Respostas devem ser apenas TEXTO formatado.\\n3. **CONTEXTO REAL**: Você é a EV, assistente de elite do Rafa. Use apenas os dados reais retornados pelas ferramentas.\\n\\n--- \\n\\nVocê é a **EV FINANCEIRA**, um Agente de Inteligência Financeira de Elite.\\n\\n### 🛠️ SUAS CAPACIDADES:\\n1. **Registrar Transações**: Entradas e Saídas no fluxo de caixa.\\n2. **Relatórios**: Avalie limites, faturas abertas e saldos reais e faturas.\\n\\n### 📝 FORMATAÇÃO DE RESPOSTA PREMIUM:\\nUse emojis e este layout exato para confirmações:\\n\\n✅ **Registro Realizado**\\n[EMOJI] - [DESCRIÇÃO] ([CATEGORIA])\\n\\n💰 - **Valor:** R$ [VALOR]\\n🏦 - **Origem:** [Conta/Cartão]\\n📅 - {{ $now.setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy') }} às {{ $now.setZone('America/Sao_Paulo').toFormat('HH:mm') }}\\n\\n--- \\nSempre confira os dados antes de responder."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -432,
+        -80
+      ],
+      "id": "1f45f07d-f8c1-4794-b477-2bb2fb34a24e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -432,
+        80
+      ],
+      "id": "d9b3deb3-b548-4075-be53-3e6e989a5637",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "8yRz2FNcjYC1Xtb9",
+          "name": "OpenAI account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Chame esta ferramenta para registrar transações financeiras (entradas, ganhos, salários, saídas, despesas, compras) para cada lançamento solicitado pelo usuário.",
+        "workflowId": {
+          "__rl": true,
+          "value": "bSyi3BjrbCgXq9WN",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/bSyi3BjrbCgXq9WN",
+          "cachedResultName": "EV Financeira | Ferramenta de Registro"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('value', ``, 'number') }}",
+            "operation": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('operation', ``, 'string') }}",
+            "category": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('category', ``, 'string') }}",
+            "payment_method": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('payment_method', ``, 'string') }}",
+            "registered_at": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('registered_at', ``, 'string') }}",
+            "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('description', ``, 'string') }}",
+            "tenant_id": "={{ $node[\"Normalize\"].json[\"contact.id\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "value",
+              "displayName": "value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "payment_method",
+              "displayName": "payment_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "registered_at",
+              "displayName": "registered_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "tenant_id",
+              "displayName": "tenant_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -288,
+        112
+      ],
+      "id": "3bcae5ef-8485-468d-9db9-b209ac685445",
+      "name": "Register Transaction"
+    },
+    {
+      "parameters": {
+        "description": "Chame esta ferramenta sempre que o usuário perguntar sobre saldos, relatórios, total de gastos, quanto sobrou, ou resumo de despesas.",
+        "workflowId": {
+          "__rl": true,
+          "value": "heKYLW4AkwPh9wkY",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "start_date": "={{ DateTime.now().minus({days: 30}).toFormat('yyyy-MM-dd') }}",
+            "end_date": "={{ DateTime.now().plus({days: 1}).toFormat('yyyy-MM-dd') }}",
+            "tenant_id": "={{ $node[\"Normalize\"].json[\"contact.id\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "start_date",
+              "displayName": "start_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "end_date",
+              "displayName": "end_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "tenant_id",
+              "displayName": "tenant_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -128,
+        128
+      ],
+      "id": "1d1b3b64-a7d5-4a87-81fe-8826c893854e",
+      "name": "Balance Report"
+    },
+    {
+      "parameters": {
+        "description": "Chame esta ferramenta para CRIAR, GERENCIAR ou EDITAR categorias (abas de orçamento) no dashboard.",
+        "workflowId": {
+          "__rl": true,
+          "value": "category-workflow-placeholder",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "category_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('category_name', ``, 'string') }}",
+            "limit": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('limit', ``, 'number') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "category_name",
+              "displayName": "category_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "limit",
+              "displayName": "limit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        20,
+        140
+      ],
+      "id": "cat-tool-agent",
+      "name": "Manage Categories"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://webhook.projetoev.com.br/webhook/whatsapp-financial",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "B5D22993E361-4914-A8E6-07AB63A3F0A1"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -1168,
+        96
+      ],
+      "id": "b24a8e96-d655-45f9-b9d4-ce8c74c3125f",
+      "name": "Send to Evolution",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "tableName": "n8n_chat_histories",
+        "sessionId": "={{ $json.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.1,
+      "position": [
+        -432,
+        240
+      ],
+      "id": "58c38a2e-ae31-a393-93d1-7a766a35002d",
+      "name": "PostgreSQL Chat Memory",
+      "credentials": {
+        "postgresDb": {
+          "id": "new-postgres-id",
+          "name": "Supabase Postgres DB"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Evolution": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register Transaction": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Balance Report": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manage Categories": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send to Evolution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b5b89180-d836-4639-bc95-c1e70cf563da",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "06665356645721433572a8968cdef103e4178eb63ddec7e800a81175fa1f99ff"
+  },
+  "id": "3FcaaLB9x9q0CHzD",
+  "tags": []
+}

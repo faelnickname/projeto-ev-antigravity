@@ -1,0 +1,6 @@
+tree 7db6cf72f7fa959024568cc37c1af47ae1bd9dcb
+parent 84a5e90fcd3cc2104d140df68a1694677e1254e3
+author Rafael <rafael.psgomescomercial@gmail.com> 1775959291 -0300
+committer Rafael <rafael.psgomescomercial@gmail.com> 1775959291 -0300
+
+Add Git LFS tracking for .node files

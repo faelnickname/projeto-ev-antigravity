@@ -1,0 +1,76 @@
+{
+  "name": "EV Financeira | Category Tool",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "category_name"
+            },
+            {
+              "name": "limit",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "cat-trigger",
+      "name": "Input"
+    },
+    {
+      "parameters": {
+        "tableId": "orcamentos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "categoria",
+              "fieldValue": "={{ $json.category_name }}"
+            },
+            {
+              "fieldId": "valor_limite",
+              "fieldValue": "={{ $json.limit || 1000 }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        250,
+        0
+      ],
+      "id": "cat-insert",
+      "name": "Insert Category",
+      "credentials": {
+        "supabaseApi": {
+          "id": "uW32m63kpcW6LTni",
+          "name": "Supabase Projeto EV"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Input": {
+      "main": [
+        [
+          {
+            "node": "Insert Category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

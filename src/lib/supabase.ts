@@ -1,9 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Usar Variáveis de ambiente no deployment real.
-// Para rodar localmente sem falhar durante a importação, usamos fallbacks vazios
-// O usuário vai definir NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY na Vercel
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://sua-url-aqui.supabase.co';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sua-chave-anon-aqui';
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Decisão Inteligente de Chave:
+// No Servidor (Webhook/API), preferimos a SERVICE_ROLE_KEY para ignorar RLS e garantir persistência.
+// No Cliente, usamos a ANON_KEY.
+const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sua-chave-aqui');
+
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false, // Evita problemas em ambientes serverless
+    autoRefreshToken: false,
+  }
+});

@@ -1,0 +1,531 @@
+{
+  "name": "EV Financeira | Register Tool",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "operation"
+            },
+            {
+              "name": "value",
+              "type": "number"
+            },
+            {
+              "name": "category"
+            },
+            {
+              "name": "payment_method"
+            },
+            {
+              "name": "registered_at"
+            },
+            {
+              "name": "description"
+            },
+            {
+              "name": "tenant_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1296,
+        192
+      ],
+      "id": "5671d2ee-40a5-4db7-9324-15bec79be833",
+      "name": "Input"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.operation.toLowerCase() }}",
+                    "rightValue": "input",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "6df1e742-1def-49d0-96ab-40bac09b4ea3"
+                  },
+                  {
+                    "leftValue": "={{ $json.operation.toLowerCase() }}",
+                    "rightValue": "inc",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "inc-alt"
+                  },
+                  {
+                    "leftValue": "={{ $json.operation.toLowerCase() }}",
+                    "rightValue": "entrada",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "entrada-alt"
+                  }
+                ],
+                "combinator": "or"
+              },
+              "renameOutput": true,
+              "outputKey": "Input"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "497e952d-1163-4624-be8e-dd12e8b43d55",
+                    "leftValue": "={{ $json.operation.toLowerCase() }}",
+                    "rightValue": "output",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $json.operation.toLowerCase() }}",
+                    "rightValue": "exp",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "exp-alt"
+                  },
+                  {
+                    "leftValue": "={{ $json.operation.toLowerCase() }}",
+                    "rightValue": "expense",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "expense-alt"
+                  },
+                  {
+                    "leftValue": "={{ $json.operation.toLowerCase() }}",
+                    "rightValue": "saída",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "saida-alt"
+                  }
+                ],
+                "combinator": "or"
+              },
+              "renameOutput": true,
+              "outputKey": "Output"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1056,
+        192
+      ],
+      "id": "68586be3-42d0-45dc-bd48-7ad06e5e8d08",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "tableId": "transacoes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "valor",
+              "fieldValue": "={{ $json.value }}"
+            },
+            {
+              "fieldId": "tipo",
+              "fieldValue": "inc"
+            },
+            {
+              "fieldId": "categoria",
+              "fieldValue": "={{ $json.category }}"
+            },
+            {
+              "fieldId": "descricao",
+              "fieldValue": "={{ $node[\"Input\"].json[\"description\"] }}"
+            },
+            {
+              "fieldId": "id_whatsapp",
+              "fieldValue": "={{ $node[\"Input\"].json[\"tenant_id\"].replace(/\\D/g, '') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        32
+      ],
+      "id": "94400052-3b43-44bd-9fab-03d374d8662d",
+      "name": "Registrar entrada",
+      "credentials": {
+        "supabaseApi": {
+          "id": "uW32m63kpcW6LTni",
+          "name": "Supabase Projeto EV"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "transacoes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "valor",
+              "fieldValue": "={{ $json.value*-1 }}"
+            },
+            {
+              "fieldId": "tipo",
+              "fieldValue": "exp"
+            },
+            {
+              "fieldId": "categoria",
+              "fieldValue": "={{ $json.category }}"
+            },
+            {
+              "fieldId": "descricao",
+              "fieldValue": "={{ $json.description }}"
+            },
+            {
+              "fieldId": "id_whatsapp",
+              "fieldValue": "={{ $node[\"Input\"].json[\"tenant_id\"].replace(/\\D/g, '') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        192
+      ],
+      "id": "289ac744-0981-4863-8ce6-a34041b952e5",
+      "name": "Registrar saída",
+      "credentials": {
+        "supabaseApi": {
+          "id": "uW32m63kpcW6LTni",
+          "name": "Supabase Projeto EV"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "Error on register this operation, please provide input or output values correctly."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        352
+      ],
+      "id": "d38db107-3e01-4f20-ba04-04c40fc7f96e",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        -576,
+        112
+      ],
+      "id": "3c28cc9c-7e7b-42da-965a-ef9ff6f540fc",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "transacoes",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id_whatsapp",
+              "condition": "eq",
+              "keyValue": "={{ $json.tenant_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        112
+      ],
+      "id": "ed04f012-85e9-4bef-a9f2-6009c57a49a6",
+      "name": "Consultar saldo",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "uW32m63kpcW6LTni",
+          "name": "Supabase Projeto EV"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d7111546-6ec5-4246-95cd-33c9ef2a25e3",
+              "leftValue": "={{ $json.keys().length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        112
+      ],
+      "id": "48f64b24-9f4b-4144-9ca8-11313f581644",
+      "name": "New Balance?"
+    },
+    {
+      "parameters": {
+        "tableId": "balance",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "value",
+              "fieldValue": "={{ $node[\"Input\"].json[\"value\"] }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ DateTime.fromISO($node[\"Input\"].json[\"registered_at\"] || $now).toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "fieldId": "id_whatsapp",
+              "fieldValue": "={{ $node[\"Input\"].json[\"tenant_id\"] }}"
+            },
+            {
+              "fieldId": "tenant_id",
+              "fieldValue": "={{ $node[\"Input\"].json[\"tenant_id\"] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "590b8906-bc1e-4841-ae07-a2d907ce6cef",
+      "name": "Criar novo saldo",
+      "credentials": {
+        "supabaseApi": {
+          "id": "uW32m63kpcW6LTni",
+          "name": "Supabase Projeto EV"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "balance",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "value",
+              "fieldValue": "={{ $json.value + $node[\"Input\"].json[\"value\"] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        208
+      ],
+      "id": "3f8d81e1-a6fb-4aad-8f40-b3ece565e4c5",
+      "name": "Atualizar saldo",
+      "credentials": {
+        "supabaseApi": {
+          "id": "uW32m63kpcW6LTni",
+          "name": "Supabase Projeto EV"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Input": [
+      {
+        "json": {
+          "operation": "input",
+          "value": 50,
+          "category": "alimentação",
+          "payment_method": "pix",
+          "registered_at": "2026-04-10T12:00:00Z",
+          "description": "almoço no restaurante",
+          "tenant_id": "5535918312988@c.us"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Input": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Registrar entrada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registrar saída",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar entrada": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar saída": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Consultar saldo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar saldo": {
+      "main": [
+        [
+          {
+            "node": "New Balance?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Balance?": {
+      "main": [
+        [
+          {
+            "node": "Criar novo saldo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Atualizar saldo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3e501417-b66c-4646-8aa9-2165dba010c7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "06665356645721433572a8968cdef103e4178eb63ddec7e800a81175fa1f99ff"
+  },
+  "id": "bSyi3BjrbCgXq9WN",
+  "tags": []
+}
