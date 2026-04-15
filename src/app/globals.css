@@ -125,7 +125,7 @@ a {
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-right: 1px solid var(--card-border);
-  padding: 2rem 1.5rem;
+  padding: 1rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -200,7 +200,7 @@ a {
   background: #0b0e1a;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
+  padding: 1rem 1.5rem;
 }
 
 /* Glassmorphism Cards */
