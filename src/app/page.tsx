@@ -3,255 +3,161 @@
 import { useState } from 'react';
 import { 
   Home, Coffee, CreditCard, 
-  Truck, Wallet
+  Truck, Wallet, TrendingUp, TrendingDown
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, 
   Tooltip, ResponsiveContainer, Cell, PieChart, Pie, 
-  LineChart, Line, ComposedChart
+  ComposedChart
 } from 'recharts';
 
-// Data Mock matching the screenshot style
+// Data Mock
 const topEntradas = [
   { name: 'Salário', value: 15000, color: '#0ea5e9' },
-  { name: 'Outras Receitas', value: 3000, color: '#ffffff' },
-  { name: '13º salário', value: 3000, color: '#ffffff' },
+  { name: 'Receitas', value: 3000, color: '#ffffff' },
+  { name: 'Bônus', value: 2000, color: '#ffffff' },
 ];
 
 const topDespesas = [
-  { name: 'Supermercado', value: 36.36, color: '#f43f5e' },
-  { name: 'Cartão de crédito', value: 18.18, color: '#fb7185' },
-  { name: 'Plano de saúde', value: 18.18, color: '#fda4af' },
-  { name: 'Prestação da casa', value: 15.15, color: '#0ea5e9' },
-  { name: 'Presentes', value: 12.12, color: '#38bdf8' },
+  { name: 'Mercado', value: 36, color: '#f43f5e' },
+  { name: 'Cartão', value: 25, color: '#fb7185' },
+  { name: 'Saúde', value: 15, color: '#fda4af' },
+  { name: 'Lazer', value: 12, color: '#0ea5e9' },
+  { name: 'Diversos', value: 12, color: '#38bdf8' },
 ];
 
 const evolucaoMensal = [
-  { month: 'jul', despesas: 1500, entradas: 2500, saldo: 1000 },
-  { month: 'ago', despesas: 2200, entradas: 3200, saldo: 2000 },
-  { month: 'set', despesas: 1800, entradas: 2800, saldo: 3000 },
-  { month: 'out', despesas: 2000, entradas: 2600, saldo: 3600 },
-  { month: 'nov', despesas: 2800, entradas: 3500, saldo: 4300 },
-  { month: 'dez', despesas: 4200, entradas: 8000, saldo: 8100 },
+  { month: 'S1', d: 1500, e: 2500 },
+  { month: 'S2', d: 2200, e: 3200 },
+  { month: 'S3', d: 1800, e: 2800 },
+  { month: 'S4', d: 2000, e: 2600 },
 ];
 
-const sparklineData = Array.from({ length: 15 }, (_, i) => ({ value: Math.random() * 100 }));
-
-export default function DashboardElite() {
-  const [activeAccount, setActiveAccount] = useState('Todos');
-
+export default function DashboardUltra() {
   return (
-    <div className="app-container zero-scroll">
-      {/* SIDEBAR ELITE (FABRIDATA STYLE) */}
-      <aside className="sidebar desktop-only" style={{ background: '#0f172a' }}>
-        <div style={{ marginBottom: '2rem', padding: '0.5rem' }}>
-          {/* Logo NEXO */}
-          <div style={{ padding: '0.5rem 0', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            <div style={{ width: '40px', height: '40px', background: 'var(--primary)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Wallet size={24} color="white" />
-            </div>
-            <span style={{ fontSize: '1.2rem', fontWeight: '800', letterSpacing: '0.1em', color: 'white' }}>NEXO</span>
-          </div>
+    <div className="app-container zero-scroll" style={{ height: '100vh', overflow: 'hidden' }}>
+      {/* SIDEBAR COMPACTA */}
+      <aside className="sidebar" style={{ width: '240px', padding: '1rem', background: '#0b0e1a' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+          <Wallet size={20} color="var(--primary)" />
+          <span style={{ fontSize: '1rem', fontWeight: '900', color: 'white' }}>NEXO</span>
+        </div>
 
-          <div className="elite-filter-group">
-            <label className="elite-filter-label">Conta</label>
-            <select className="elite-select" value={activeAccount} onChange={(e) => setActiveAccount(e.target.value)}>
-              <option>Todos</option>
-              <option>Itaú Personnalité</option>
-              <option>Santander Select</option>
-            </select>
-          </div>
+        <div className="elite-filter-group" style={{ marginBottom: '1rem' }}>
+          <label className="elite-filter-label" style={{ fontSize: '0.6rem' }}>CONTA ATIVA</label>
+          <select className="elite-select" style={{ fontSize: '0.7rem' }}>
+            <option>Todas as Contas</option>
+          </select>
+        </div>
 
-          <table className="account-table">
-            <thead>
-              <tr>
-                <th>Contas</th>
-                <th>Saldo</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>CAIXXXA</td>
-                <td>R$ 6.616 <span className="status-dot" style={{ background: '#10B981' }}></span></td>
-              </tr>
-              <tr>
-                <td>BUBANK</td>
-                <td>-R$ 900 <span className="status-dot" style={{ background: '#f43f5e' }}></span></td>
-              </tr>
-              <tr>
-                <td>WISA</td>
-                <td>-R$ 1.500 <span className="status-dot" style={{ background: '#f43f5e' }}></span></td>
-              </tr>
-            </tbody>
-          </table>
+        <table className="account-table" style={{ marginTop: 0 }}>
+          <thead>
+            <tr><th style={{ fontSize: '0.55rem' }}>INSTITUIÇÃO</th><th style={{ fontSize: '0.55rem' }}>SALDO</th></tr>
+          </thead>
+          <tbody style={{ fontSize: '0.7rem' }}>
+            <tr><td>CAIXA</td><td>R$ 6k <span className="status-dot" style={{ background: '#10B981' }}></span></td></tr>
+            <tr><td>NUBANK</td><td>-R$ 900 <span className="status-dot" style={{ background: '#f43f5e' }}></span></td></tr>
+            <tr><td>WISA</td><td>-R$ 1.5k <span className="status-dot" style={{ background: '#f43f5e' }}></span></td></tr>
+          </tbody>
+        </table>
 
-          <div className="elite-filter-group">
-            <label className="elite-filter-label">Período</label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <input type="date" className="elite-select" defaultValue="2023-07-01" />
-              <input type="date" className="elite-select" defaultValue="2024-12-30" />
-            </div>
-          </div>
-
-          <div className="elite-filter-group">
-            <label className="elite-filter-label">Ano</label>
-            <select className="elite-select"><option>2023</option><option>2024</option></select>
-          </div>
-
-          <div className="elite-filter-group">
-            <label className="elite-filter-label">Mês</label>
-            <select className="elite-select"><option>Todos</option></select>
-          </div>
-
-          <button className="btn" style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#64748b', justifyContent: 'center' }}>
-            Limpar Filtros
-          </button>
+        <div style={{ marginTop: 'auto', padding: '1rem', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <span className="elite-filter-label" style={{ fontSize: '0.6rem' }}>SESSÃO ATIVA</span>
+          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Rafa (Admin)</div>
         </div>
       </aside>
 
-      <main className="main-content" style={{ padding: '1.5rem', height: '100vh', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <h1 className="page-title" style={{ fontSize: '1.4rem', marginBottom: '0.5rem' }}>Dashboard Finanças Pessoais</h1>
-
-        <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr 1fr 1.2fr', gap: '0.8rem', marginBottom: 0 }}>
-          {/* KPI 1: SALDO */}
-          <div className="glass-card kpi-card-saldo">
-            <div className="kpi-card-inner">
-              <span className="kpi-label-elite">Saldo</span>
-              <div className="stat-value">R$ 4.216</div>
-              <div className="kpi-sparkline">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={sparklineData}>
-                    <Line type="monotone" dataKey="value" stroke="white" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+      <main className="main-content" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', height: '100vh' }}>
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h1 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Dashboard Financeiro</h1>
+          <div style={{ fontSize: '0.7rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', padding: '4px 8px', borderRadius: '4px', fontWeight: 700 }}>
+            ● LIVE SYNC
           </div>
+        </header>
 
-          {/* KPI 2: ENTRADAS */}
-          <div className="glass-card">
-            <div className="kpi-card-inner">
-              <span className="kpi-label-elite" style={{ color: '#64748b' }}>Entradas</span>
-              <div className="stat-value">R$ 20.300</div>
-              <div className="kpi-sparkline">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={sparklineData}>
-                    <Line type="monotone" dataKey="value" stroke="#0ea5e9" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+        {/* ROW 1: KPIs */}
+        <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.8rem', marginBottom: 0 }}>
+          <div className="glass-card kpi-card-saldo" style={{ padding: '0.8rem' }}>
+            <span style={{ fontSize: '0.7rem', opacity: 0.8, fontWeight: 600 }}>SALDO ATUAL</span>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800 }}>R$ 4.216</div>
           </div>
-
-          {/* KPI 3: DESPESAS */}
-          <div className="glass-card">
-            <div className="kpi-card-inner">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="kpi-label-elite" style={{ color: '#64748b' }}>Despesas</span>
-                <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 800 }}>79,23%</span>
-              </div>
-              <div className="stat-value">R$ 16.084</div>
-              <div className="kpi-sparkline">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={sparklineData}>
-                    <Line type="monotone" dataKey="value" stroke="#f43f5e" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+          <div className="glass-card" style={{ padding: '0.8rem', borderLeft: '4px solid #0ea5e9' }}>
+            <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>ENTRADAS</span>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0ea5e9' }}>R$ 20.300</div>
+          </div>
+          <div className="glass-card" style={{ padding: '0.8rem', borderLeft: '4px solid #f43f5e' }}>
+            <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>DESPESAS</span>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f43f5e' }}>R$ 16.084</div>
           </div>
         </div>
 
-        <div className="dashboard-grid" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: '1.5rem' }}>
-          {/* CHART: TOP 5 ENTRADAS */}
-          <div className="glass-card" style={{ padding: '1rem' }}>
-            <h3 className="elite-filter-label" style={{ marginBottom: '1rem', fontSize: '0.8rem' }}>Top 5 Entradas</h3>
-            <div style={{ height: '160px' }}>
+        {/* ROW 2: PRINCIPAL CHARTS */}
+        <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '0.8rem', flex: 1, maxHeight: '250px' }}>
+          <div className="glass-card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column' }}>
+            <h3 className="elite-filter-label" style={{ fontSize: '0.7rem', marginBottom: '0.5rem' }}>DISTRIBUIÇÃO DE DESPESAS</h3>
+            <div style={{ flex: 1 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topEntradas} layout="horizontal">
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} dy={10} />
-                  <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }} />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={40}>
-                    {topEntradas.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
+                <PieChart>
+                  <Pie data={topDespesas} innerRadius={35} outerRadius={55} paddingAngle={5} dataKey="value">
+                    {topDespesas.map((e, i) => <Cell key={i} fill={e.color} />)}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="glass-card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column' }}>
+            <h3 className="elite-filter-label" style={{ fontSize: '0.7rem', marginBottom: '0.5rem' }}>TOP ENTRADAS</h3>
+            <div style={{ flex: 1 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topEntradas}>
+                  <XAxis dataKey="name" hide />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={30}>
+                    {topEntradas.map((e, i) => <Cell key={i} fill={e.color} />)}
                   </Bar>
+                  <Tooltip />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
-
-          {/* CHART: TOP 5 DESPESAS */}
-          <div className="glass-card" style={{ padding: '1rem' }}>
-            <h3 className="elite-filter-label" style={{ marginBottom: '1rem', fontSize: '0.8rem' }}>Top 5 Despesas</h3>
-            <div style={{ display: 'flex', alignItems: 'center', height: '160px' }}>
-              <div style={{ flex: 1.2, height: '100%' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={topDespesas}
-                      innerRadius={50}
-                      outerRadius={70}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {topDespesas.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <span className="elite-filter-label" style={{ fontSize: '0.6rem' }}>CATEGORIA</span>
-                {topDespesas.map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.7rem', fontWeight: 600 }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color }}></div>
-                    <span style={{ color: '#94a3b8', flex: 1 }}>{item.name}</span>
-                    <span>{item.value}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div className="dashboard-grid" style={{ gridTemplateColumns: '1.2fr 1fr', gap: '0.8rem', marginBottom: 0, flex: 1 }}>
-          {/* CHART: EVOLUÇÃO MENSAL */}
-          <div className="glass-card" style={{ padding: '1rem' }}>
-            <h3 className="elite-filter-label" style={{ marginBottom: '1rem', fontSize: '0.8rem' }}>Evolução Mensal</h3>
-            <div style={{ height: '150px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={evolucaoMensal}>
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
-                  <Bar dataKey="despesas" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={15} />
-                  <Bar dataKey="entradas" fill="#0ea5e9" radius={[4, 4, 0, 0]} barSize={15} />
-                  <Line type="monotone" dataKey="saldo" stroke="white" strokeDasharray="5 5" strokeWidth={2} dot={false} />
-                  <Tooltip />
-                </ComposedChart>
-              </ResponsiveContainer>
+        {/* ROW 3: CATEGORIES & QUICK VIEW */}
+        <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.8rem', marginBottom: 0 }}>
+          {[
+            { l: 'Moradia', v: '2.9k', i: Home },
+            { l: 'Cartão', v: '1.8k', i: CreditCard },
+            { l: 'Transporte', v: '1.5k', i: Truck },
+            { l: 'Lazer', v: '900', i: Coffee },
+          ].map((c, i) => (
+            <div key={i} className="glass-card" style={{ padding: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '8px' }}>
+                <c.i size={16} color="var(--primary)" />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.55rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>{c.l}</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>R$ {c.v}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ROW 4: TREND (ULTRA-COMPACT) */}
+        <div className="glass-card" style={{ padding: '0.8rem', height: '80px', flex: 'none' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <span className="elite-filter-label" style={{ fontSize: '0.6rem' }}>TENDÊNCIA SEMANAL</span>
+            <div style={{ fontSize: '0.6rem', color: '#10B981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <TrendingUp size={10} /> +12% vs semana passada
             </div>
           </div>
-
-          {/* BOTTOM CATEGORY GRID */}
-          <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: 0 }}>
-            {[
-              { label: 'Moradia', value: '2.929', color: '#f97316', icon: Home },
-              { label: 'Lazer', value: '900', color: '#f97316', icon: Coffee },
-              { label: 'Cartão', value: '1.800', color: '#f97316', icon: CreditCard },
-              { label: 'Transporte', value: '1.500', color: '#f97316', icon: Truck },
-            ].map((cat, i) => (
-              <div key={i} className="category-mini-card" style={{ borderLeftColor: cat.color }}>
-                <div className="category-icon-wrapper">
-                  <cat.icon size={18} color={cat.color} />
-                </div>
-                <div>
-                  <div className="elite-filter-label" style={{ marginBottom: 0, fontSize: '0.65rem' }}>{cat.label}</div>
-                  <div style={{ fontSize: '1rem', fontWeight: 800 }}>R$ {cat.value}</div>
-                </div>
-              </div>
-            ))}
+          <div style={{ height: '40px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={evolucaoMensal}>
+                <Bar dataKey="e" fill="rgba(14, 165, 233, 0.2)" barSize={40} />
+                <Bar dataKey="d" fill="rgba(244, 63, 94, 0.4)" barSize={40} />
+              </ComposedChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </main>
