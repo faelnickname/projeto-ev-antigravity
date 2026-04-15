@@ -1,17 +1,18 @@
 :root {
-  --bg-color: #020617;
+  --bg-color: #0b0e1a; /* Deep primary background from screenshot */
   --text-color: #f8fafc;
-  --card-bg: rgba(15, 23, 42, 0.4);
-  --card-border: rgba(0, 210, 255, 0.08);
+  --card-bg: rgba(18, 24, 45, 0.7);
+  --card-border: rgba(255, 255, 255, 0.05);
   
-  --primary: #00d2ff;
-  --primary-glow: rgba(0, 210, 255, 0.2);
+  --primary: #0ea5e9; /* Sky blue for Entradas */
+  --secondary: #f97316; /* Orange for Saldo start */
+  --saldo-end: #ef4444; /* Red for Saldo end */
   --accent: #10B981;
-  --danger: #e11d48;
-  --glass-blur: blur(20px);
+  --danger: #f43f5e; /* Rose red for Despesas */
+  --glass-blur: blur(24px);
 
-  --sidebar-w: 260px;
-  --header-h: 70px;
+  --sidebar-w: 280px;
+  --header-h: 80px;
   
   --vh: 100vh;
 }
@@ -145,15 +146,16 @@ a {
 }
 
 .nav-link:hover {
-  background: rgba(0, 210, 255, 0.1);
-  color: var(--primary);
-  transform: translateX(6px);
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  transform: translateX(4px);
 }
 
 .nav-link.active {
-  background: var(--primary);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
-  box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+  border-left: 3px solid var(--primary);
+  border-radius: 4px 14px 14px 4px;
 }
 
 .main-content {
@@ -248,13 +250,111 @@ a {
 }
 
 .stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-top: 0.5rem;
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-top: 0.2rem;
+  letter-spacing: -0.02em;
 }
 
-.stat-income { color: var(--accent); }
-.stat-expense { color: var(--danger); }
+.stat-income { color: #f8fafc; }
+.stat-expense { color: #f8fafc; }
+
+/* Dashboard Elite Specifics */
+.kpi-card-saldo {
+  background: linear-gradient(135deg, var(--secondary), var(--saldo-end)) !important;
+  color: white !important;
+}
+
+.kpi-card-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-label-elite {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 0.2rem;
+}
+
+.kpi-sparkline {
+  height: 40px;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.account-table {
+  width: 100%;
+  margin: 1.5rem 0;
+  border-collapse: separate;
+  border-spacing: 0 4px;
+}
+
+.account-table th {
+  text-align: left;
+  font-size: 0.65rem;
+  color: #64748b;
+  text-transform: uppercase;
+  padding: 0.5rem;
+}
+
+.account-table td {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 0.5rem;
+}
+
+.elite-filter-group {
+  margin-bottom: 1.5rem;
+}
+
+.elite-filter-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  display: block;
+}
+
+.elite-select {
+  width: 100%;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  padding: 0.6rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.category-mini-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1rem;
+  border-left: 4px solid transparent;
+}
+
+.category-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.05);
+}
 
 /* Buttons */
 .btn {
