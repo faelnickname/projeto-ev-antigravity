@@ -133,44 +133,74 @@ a {
 }
 
 .sidebar h1 {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: white;
+  letter-spacing: -0.02em;
+}
+
+.sidebar-subtitle {
+  font-size: 0.55rem;
+  color: #64748b;
   font-weight: 700;
+  text-transform: uppercase;
   margin-bottom: 2rem;
-  display: flex;
-  align-items: center;
+  letter-spacing: 0.05em;
+}
+
+.status-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 0.8rem;
+  margin-bottom: 2rem;
+}
+
+.status-label {
+  font-size: 0.55rem;
+  color: #64748b;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.status-value {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: white;
 }
 
 .nav-link {
-  padding: 0.9rem 1.2rem;
-  border-radius: 14px;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  font-weight: 500;
-  color: #64748b;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  transition: all 0.2s ease;
 }
 
 .nav-link:hover {
   background: rgba(255, 255, 255, 0.05);
   color: white;
-  transform: translateX(4px);
 }
 
 .nav-link.active {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 163, 255, 0.1);
   color: white;
-  border-left: 3px solid var(--primary);
-  border-radius: 4px 14px 14px 4px;
+  border-left: 2px solid #00a3ff;
 }
 
 .main-content {
   flex: 1;
   overflow: hidden;
-  background: radial-gradient(circle at top right, rgba(0, 210, 255, 0.03), transparent 40%);
+  background: #0b0e1a;
   display: flex;
   flex-direction: column;
-  position: relative;
+  padding: 1.5rem;
 }
 
 /* Glassmorphism Cards */
