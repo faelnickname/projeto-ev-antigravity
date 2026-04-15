@@ -16,7 +16,14 @@ import { supabase } from '@/lib/supabase';
 const sparklineData = Array.from({ length: 20 }, (_, i) => ({ value: 30 + Math.random() * 40 }));
 
 export default function DashboardNexusFinal() {
-  const [data, setData] = useState({
+  const [data, setData] = useState<{
+    saldo: number;
+    entradas: number;
+    saidas: number;
+    topDespesas: any[];
+    recentTransactions: any[];
+    accounts: any[];
+  }>({
     saldo: 0,
     entradas: 0,
     saidas: 0,
