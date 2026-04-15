@@ -29,11 +29,16 @@ export default function RootLayout({
         <div className="app-container zero-scroll">
           {/* SIDEBAR NEXUS STYLE */}
           <aside className="sidebar desktop-only" style={{ background: '#0f172a' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
-              <ShieldCheck size={24} color="#00a3ff" fill="#00a3ff" fillOpacity={0.2} />
-              <h1 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', margin: 0 }}>NEXO<span style={{ color: '#00a3ff' }}>FINANCEIRO</span></h1>
+            <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+              <img 
+                src="/logo.png" 
+                alt="Nexus Financeiro Logo" 
+                style={{ width: '100px', height: 'auto', marginBottom: '0.5rem' }} 
+              />
+              <div className="sidebar-subtitle" style={{ fontSize: '0.6rem', letterSpacing: '2px', textAlign: 'center' }}>
+                GESTÃO DE PERFORMANCE OPERACIONAL
+              </div>
             </div>
-            <div className="sidebar-subtitle">GESTÃO DE PERFORMANCE OPERACIONAL</div>
 
             <div className="status-box">
               <span className="status-label">STATUS DO SISTEMA</span>
