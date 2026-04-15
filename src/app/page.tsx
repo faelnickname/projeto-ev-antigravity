@@ -22,17 +22,17 @@ export default function DashboardNexusFinal() {
     saidas: number;
     topDespesas: any[];
     recentTransactions: any[];
-    accounts: any[];
+    period: { start: string, end: string };
   }>({
     saldo: 0,
     entradas: 0,
     saidas: 0,
     topDespesas: [],
     recentTransactions: [],
-    accounts: []
+    period: { start: '01/01/2024', end: '31/12/2024' }
   });
   const [allTransactions, setAllTransactions] = useState<any[]>([]);
-  const [filter, setFilter] = useState('Todos');
+  const [filter, setFilter] = useState('Selecionar Despesa');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -74,24 +74,18 @@ export default function DashboardNexusFinal() {
       color: ['#f43f5e', '#fb7185', '#fda4af', '#0ea5e9', '#38bdf8'][i % 5]
     }));
 
-    // Dynamic Filter Logic for "accounts" section
-    let accountsList = [];
-    if (filter === 'Todos') {
-      accountsList = [
-        { n: 'CAIXXXA', v: entradas * 0.4, s: '#10B981' },
-        { n: 'BUBANK', v: -saidas * 0.2, s: '#f43f5e' },
-        { n: 'VISA', v: -saidas * 0.1, s: '#f43f5e' }
-      ];
-    } else {
-      // Filter records by category
-      const filtered = allTransactions.filter(t => 
-        t.categoria?.toLowerCase().includes(filter.toLowerCase())
-      );
-      accountsList = filtered.slice(0, 10).map(t => ({
-        n: t.descricao || t.categoria,
-        v: t.tipo === 'entrada' ? t.valor : -t.valor,
-        s: t.tipo === 'entrada' ? '#10B981' : '#f43f5e'
-      }));
+    // Dynamic Period Logic
+    const filtered = filter === 'Selecionar Despesa' 
+      ? allTransactions 
+      : allTransactions.filter(t => t.categoria?.toLowerCase().includes(filter.toLowerCase()));
+
+    let start = '01/01/2024';
+    let end = '31/12/2024';
+    
+    if (filtered.length > 0) {
+      const dates = filtered.map(t => new Date(t.created_at).getTime()).sort((a,b) => a - b);
+      start = new Date(dates[0]).toLocaleDateString('pt-BR');
+      end = new Date(dates[dates.length - 1]).toLocaleDateString('pt-BR');
     }
 
     setData({
@@ -99,8 +93,8 @@ export default function DashboardNexusFinal() {
       entradas,
       saidas,
       topDespesas: topDespesasPerc as any,
-      recentTransactions: allTransactions.slice(0, 4),
-      accounts: accountsList
+      recentTransactions: filtered.slice(0, 4),
+      period: { start, end }
     });
   }, [allTransactions, filter]);
 
@@ -158,48 +152,33 @@ export default function DashboardNexusFinal() {
         {/* LEFT COLUMN: FILTERS & ACCOUNTS */}
         <div className="glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
           <div className="elite-filter-group">
-            <label className="elite-filter-label" style={{ fontSize: '0.65rem' }}>CONTA</label>
+            <label className="elite-filter-label" style={{ fontSize: '0.65rem' }}>Tipo de Despesa</label>
             <select 
               className="elite-select" 
               style={{ fontSize: '0.75rem', padding: '0.5rem' }}
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
             >
-              <option value="Todos">Todos</option>
+              <option value="Selecionar Despesa">Selecionar Despesa</option>
               <option value="Coral">Despesa Coral</option>
               <option value="Fixa">Despesa Fixa</option>
               <option value="Cartão">Cartão</option>
             </select>
           </div>
 
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: '#64748b', fontWeight: 700, marginBottom: '0.5rem' }}>
-              <span>{filter === 'Todos' ? 'CONTAS' : 'REGISTROS'}</span>
-              <span>VALOR</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              {data.accounts.map((acc: any, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', fontWeight: 600 }}>
-                  <span>{acc.n}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                    <span>{acc.v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: acc.s }}></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
             <div className="elite-filter-group">
               <label className="elite-filter-label" style={{ fontSize: '0.65rem' }}>PERÍODO</label>
               <div style={{ display: 'flex', gap: '0.4rem' }}>
-                <input type="text" className="elite-select" defaultValue="01/07/2023" style={{ textAlign: 'center', fontSize: '0.7rem', padding: '0.4rem' }} />
-                <input type="text" className="elite-select" defaultValue="30/12/2024" style={{ textAlign: 'center', fontSize: '0.7rem', padding: '0.4rem' }} />
+                <input type="text" className="elite-select" value={data.period.start} readOnly style={{ textAlign: 'center', fontSize: '0.7rem', padding: '0.4rem' }} />
+                <input type="text" className="elite-select" value={data.period.end} readOnly style={{ textAlign: 'center', fontSize: '0.7rem', padding: '0.4rem' }} />
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', cursor: 'pointer', justifyContent: 'center' }}>
+            <div 
+              style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', cursor: 'pointer', justifyContent: 'center' }}
+              onClick={() => setFilter('Selecionar Despesa')}
+            >
               <CheckSquare size={14} color="#64748b" />
               <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b' }}>Limpar filtros</span>
             </div>
