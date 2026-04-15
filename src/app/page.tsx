@@ -147,14 +147,14 @@ export default function DashboardCompact() {
         </div>
 
         {/* ROW 4: TENDÊNCIA (INTEGRADA NO RODAPÉ) */}
-        <div className="glass-card" style={{ padding: '0.6rem', height: '60px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-            <span style={{ fontSize: '0.6rem', color: '#64748b', fontWeight: 700 }}>TENDÊNCIA SEMANAL</span>
-            <div style={{ fontSize: '0.55rem', color: '#10B981', display: 'flex', alignItems: 'center', gap: '2px', fontWeight: 700 }}>
-              <TrendingUp size={10} /> +12% VS SEMANA ANTERIOR
+        <div className="glass-card" style={{ padding: '0.4rem 0.6rem', height: '55px', flexShrink: 0, marginBottom: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+            <span style={{ fontSize: '0.55rem', color: '#64748b', fontWeight: 700 }}>TENDÊNCIA SEMANAL</span>
+            <div style={{ fontSize: '0.5rem', color: '#10B981', display: 'flex', alignItems: 'center', gap: '2px', fontWeight: 700 }}>
+              <TrendingUp size={8} /> +12% VS SEMANA ANTERIOR
             </div>
           </div>
-          <div style={{ height: '25px' }}>
+          <div style={{ height: '20px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={evolucaoMensal}>
                 <Bar dataKey="e" fill="rgba(14, 165, 233, 0.2)" barSize={60} />
