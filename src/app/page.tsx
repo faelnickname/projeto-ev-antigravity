@@ -45,13 +45,12 @@ export default function DashboardElite() {
       {/* SIDEBAR ELITE (FABRIDATA STYLE) */}
       <aside className="sidebar desktop-only" style={{ background: '#0f172a' }}>
         <div style={{ marginBottom: '2rem', padding: '0.5rem' }}>
-          {/* Logo FABRIDATA */}
-          <div style={{ background: 'white', padding: '1rem', borderRadius: '12px', display: 'flex', justifyContent: 'center', marginBottom: '1.5rem', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
-            <img 
-              src="/fabridata-logo.png" 
-              alt="FABRIDATA LOGO" 
-              style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }}
-            />
+          {/* Logo NEXO */}
+          <div style={{ padding: '0.5rem 0', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <div style={{ width: '40px', height: '40px', background: 'var(--primary)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Wallet size={24} color="white" />
+            </div>
+            <span style={{ fontSize: '1.2rem', fontWeight: '800', letterSpacing: '0.1em', color: 'white' }}>NEXO</span>
           </div>
 
           <div className="elite-filter-group">
@@ -110,10 +109,10 @@ export default function DashboardElite() {
         </div>
       </aside>
 
-      <main className="main-content" style={{ padding: '2rem' }}>
-        <h1 className="page-title" style={{ fontSize: '1.8rem', marginBottom: '1.5rem' }}>Dashboard Finanças Pessoais</h1>
+      <main className="main-content" style={{ padding: '1.5rem', height: '100vh', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <h1 className="page-title" style={{ fontSize: '1.4rem', marginBottom: '0.5rem' }}>Dashboard Finanças Pessoais</h1>
 
-        <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr 1fr 1.2fr' }}>
+        <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr 1fr 1.2fr', gap: '0.8rem', marginBottom: 0 }}>
           {/* KPI 1: SALDO */}
           <div className="glass-card kpi-card-saldo">
             <div className="kpi-card-inner">
@@ -165,9 +164,9 @@ export default function DashboardElite() {
 
         <div className="dashboard-grid" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: '1.5rem' }}>
           {/* CHART: TOP 5 ENTRADAS */}
-          <div className="glass-card">
-            <h3 className="elite-filter-label" style={{ marginBottom: '1.5rem', fontSize: '0.9rem' }}>Top 5 Entradas por categoria</h3>
-            <div style={{ height: '200px' }}>
+          <div className="glass-card" style={{ padding: '1rem' }}>
+            <h3 className="elite-filter-label" style={{ marginBottom: '1rem', fontSize: '0.8rem' }}>Top 5 Entradas</h3>
+            <div style={{ height: '160px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={topEntradas} layout="horizontal">
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} dy={10} />
@@ -183,9 +182,9 @@ export default function DashboardElite() {
           </div>
 
           {/* CHART: TOP 5 DESPESAS */}
-          <div className="glass-card">
-            <h3 className="elite-filter-label" style={{ marginBottom: '1.5rem', fontSize: '0.9rem' }}>Top 5 Despesas por categoria</h3>
-            <div style={{ display: 'flex', alignItems: 'center', height: '200px' }}>
+          <div className="glass-card" style={{ padding: '1rem' }}>
+            <h3 className="elite-filter-label" style={{ marginBottom: '1rem', fontSize: '0.8rem' }}>Top 5 Despesas</h3>
+            <div style={{ display: 'flex', alignItems: 'center', height: '160px' }}>
               <div style={{ flex: 1.2, height: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -218,11 +217,11 @@ export default function DashboardElite() {
           </div>
         </div>
 
-        <div className="dashboard-grid" style={{ gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
+        <div className="dashboard-grid" style={{ gridTemplateColumns: '1.2fr 1fr', gap: '0.8rem', marginBottom: 0, flex: 1 }}>
           {/* CHART: EVOLUÇÃO MENSAL */}
-          <div className="glass-card">
-            <h3 className="elite-filter-label" style={{ marginBottom: '1.5rem', fontSize: '0.9rem' }}>Evolução mensal despesas vs entradas</h3>
-            <div style={{ height: '200px' }}>
+          <div className="glass-card" style={{ padding: '1rem' }}>
+            <h3 className="elite-filter-label" style={{ marginBottom: '1rem', fontSize: '0.8rem' }}>Evolução Mensal</h3>
+            <div style={{ height: '150px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={evolucaoMensal}>
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
