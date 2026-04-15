@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { 
   Home, Coffee, CreditCard, 
-  Truck
+  Truck, Wallet
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, 
