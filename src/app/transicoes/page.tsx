@@ -176,22 +176,71 @@ function TransicoesContent() {
                       </tr>
                     </thead>
                     <tbody>
-                      {transacoesFiltradas.map((t, i) => (
-                        <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s', cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.02)'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-                          <td style={{ padding: '1.2rem 1rem', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>{new Date(t.created_at).toLocaleDateString('pt-BR')} {new Date(t.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}</td>
-                          <td style={{ padding: '1.2rem 1rem', fontWeight: 700, fontSize: '0.9rem', color: '#fff' }}>{(t.description || t.descricao || '').toUpperCase()}</td>
-                          <td style={{ padding: '1.2rem 1rem' }}><span className="elite-badge" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>{(t.category || t.categoria || 'OUTROS').toUpperCase()}</span></td>
-                          <td style={{ padding: '1.2rem 1rem' }}>
-                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                               <div style={{ width: 8, height: 8, borderRadius: '50%', background: (t.tipo === 'inc' || t.tipo === 'receita') ? 'var(--accent)' : 'var(--danger)', boxShadow: `0 0 10px ${(t.tipo === 'inc' || t.tipo === 'receita') ? 'var(--accent)' : 'var(--danger)'}` }}></div>
-                               <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'rgba(255,255,255,0.8)' }}>{(t.tipo === 'inc' || t.tipo === 'receita') ? 'SUCESSO' : 'LIQUIDADO'}</span>
-                             </div>
-                          </td>
-                          <td style={{ padding: '1.2rem 1rem', textAlign:'right', fontWeight: 900, fontSize: '1.05rem', color: (t.tipo === 'inc' || t.tipo === 'receita') ? 'var(--accent)' : '#fff'}}>
-                            {(t.tipo === 'inc' || t.tipo === 'receita') ? '+' : '-'} {formatCurrency(Math.abs(t.valor))}
-                          </td>
-                        </tr>
-                      ))}
+                      {transacoesFiltradas.map((t, i) => {
+                        const isEntrada = t.tipo === 'inc' || t.tipo === 'receita';
+                        const isPendente = t.status === 'a pagar' || t.status === 'a receber';
+                        const dotColor = isEntrada 
+                          ? (isPendente ? '#eab308' : '#10b981') 
+                          : (isPendente ? '#eab308' : '#ef4444');
+
+                        return (
+                          <tr key={t.id || i} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.02)'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                            <td style={{ padding: '1.2rem 1rem', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>{new Date(t.created_at).toLocaleDateString('pt-BR')} {new Date(t.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}</td>
+                            <td style={{ padding: '1.2rem 1rem', fontWeight: 700, fontSize: '0.9rem', color: '#fff' }}>{(t.description || t.descricao || '').toUpperCase()}</td>
+                            <td style={{ padding: '1.2rem 1rem' }}><span className="elite-badge" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>{(t.category || t.categoria || 'OUTROS').toUpperCase()}</span></td>
+                            <td style={{ padding: '1.2rem 1rem' }}>
+                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: dotColor, boxShadow: `0 0 10px ${dotColor}` }}></div>
+                                 <select 
+                                   value={t.status || (isEntrada ? 'recebido' : 'pago')}
+                                   onChange={async (e) => {
+                                      const newVal = e.target.value;
+                                      
+                                      // Default optimistic upgrade
+                                      setTransacoes(prev => prev.map(tr => tr.id === t.id ? { ...tr, status: newVal } : tr));
+                                      
+                                      if (t.id) {
+                                        const { error } = await supabase.from('transacoes').update({ status: newVal }).eq('id', t.id);
+                                        if (error) {
+                                          console.error("Failed to update status", error);
+                                          // Revert on failure
+                                          setTransacoes(prev => prev.map(tr => tr.id === t.id ? { ...tr, status: t.status } : tr));
+                                        }
+                                      }
+                                   }}
+                                   style={{ 
+                                     background: 'rgba(255,255,255,0.03)', 
+                                     border: '1px solid rgba(255,255,255,0.1)', 
+                                     color: isPendente ? '#eab308' : 'rgba(255,255,255,0.8)', 
+                                     fontSize: '0.7rem', 
+                                     fontWeight: 800, 
+                                     textTransform: 'uppercase', 
+                                     cursor: 'pointer', 
+                                     outline: 'none', 
+                                     borderRadius: '4px',
+                                     padding: '0.2rem 0.4rem'
+                                   }}
+                                 >
+                                   {isEntrada ? (
+                                     <>
+                                       <option value="recebido" style={{ color: 'black' }}>RECEBIDO</option>
+                                       <option value="a receber" style={{ color: 'black' }}>A RECEBER</option>
+                                     </>
+                                   ) : (
+                                     <>
+                                       <option value="pago" style={{ color: 'black' }}>PAGO</option>
+                                       <option value="a pagar" style={{ color: 'black' }}>A PAGAR</option>
+                                     </>
+                                   )}
+                                 </select>
+                               </div>
+                            </td>
+                            <td style={{ padding: '1.2rem 1rem', textAlign:'right', fontWeight: 900, fontSize: '1.05rem', color: isEntrada ? 'var(--accent)' : '#fff'}}>
+                              {isEntrada ? '+' : '-'} {formatCurrency(Math.abs(t.valor))}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                </div>
