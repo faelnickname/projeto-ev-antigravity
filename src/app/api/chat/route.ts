@@ -147,6 +147,35 @@ export async function POST(request: Request) {
           return NextResponse.json({ resposta: "Aviso: Consegui processar o comando, mas uma ou mais transações falharam ao salvar no banco." }, { status: 500 });
         }
       }
+      // ALTERAR TRANSAÇÃO
+      else if (respostaIA.intencao === 'alterar_transacao' && respostaIA.dados_alteracao) {
+        const { busca_descricao, novo_dia_vencimento, novo_status } = respostaIA.dados_alteracao;
+        
+        const { data: achados } = await supabase
+          .from('transacoes')
+          .select('*')
+          .eq('id_whatsapp', FINAL_DB_ID)
+          .ilike('descricao', `%${busca_descricao}%`)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (achados && achados.length > 0) {
+           const alvo = achados[0];
+           const updates: any = {};
+           
+           if (novo_status) updates.status = novo_status;
+           
+           if (novo_dia_vencimento) {
+              const baseDesc = alvo.descricao.replace(/\(Vence Dia \d+\)/i, '').trim();
+              updates.descricao = `${baseDesc} (Vence Dia ${novo_dia_vencimento})`;
+           }
+           
+           await supabase.from('transacoes').update(updates).eq('id', alvo.id);
+           console.log(`✅ Transação atualizada: ${alvo.descricao}`);
+        } else {
+           console.log(`⚠️ Não encontrei despesa: ${busca_descricao}`);
+        }
+      }
       // AGENDA
       else if (respostaIA.intencao === 'agenda' && respostaIA.dados) {
         const dados = respostaIA.dados;

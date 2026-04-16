@@ -211,6 +211,40 @@ CONTAS: ${contas?.map(c => `${c.nome}: R$ ${c.saldo}`).join(', ') || 'Nenhuma'}
           log('ERROR', `Exceção ao inserir transação: ${dbErr.message}`);
         }
       }
+    } else if (ia.intencao === 'alterar_transacao' && ia.dados_alteracao) {
+      log('INFO', 'Alterando transação existente...');
+      try {
+        const { busca_descricao, novo_dia_vencimento, novo_status } = ia.dados_alteracao;
+        // Buscar transação parecida
+        const { data: achados } = await supabase
+          .from('transacoes')
+          .select('*')
+          .eq('id_whatsapp', FINAL_DB_ID)
+          .ilike('descricao', `%${busca_descricao}%`)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (achados && achados.length > 0) {
+           const alvo = achados[0];
+           const updates: any = {};
+           
+           if (novo_status) {
+              updates.status = novo_status;
+           }
+           
+           if (novo_dia_vencimento) {
+              const baseDesc = alvo.descricao.replace(/\(Vence Dia \d+\)/i, '').trim();
+              updates.descricao = `${baseDesc} (Vence Dia ${novo_dia_vencimento})`;
+           }
+           
+           await supabase.from('transacoes').update(updates).eq('id', alvo.id);
+           log('INFO', `Transação ${alvo.id} atualizada com sucesso`);
+        } else {
+           log('WARNING', `Transação não encontrada para: ${busca_descricao}`);
+        }
+      } catch (err) {
+         log('ERROR', 'Erro ao alterar transação');
+      }
     }
 
     // Salva log da conversa
