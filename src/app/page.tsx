@@ -206,12 +206,12 @@ export default function DashboardNexusFinal() {
 
         {/* RIGHT COLUMN: CHARTS & RECENT */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: 0 }}>
-          {/* CHARTS ROW: MULTI COCKPIT VIEW */}
+          {/* CHARTS ROW: DUAL HIGH-FOCUS VIEW */}
           <div style={{ display: 'flex', gap: '1rem', height: '320px' }}>
-            {/* 1. PIE CHART CARD (DETALHAMENTO) - REDUCED */}
-            <div className="glass-card" style={{ width: '18%', padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'white', marginBottom: '0.4rem', textTransform: 'uppercase', opacity: 0.8 }}>
-                Detalhes
+            {/* 1. PIE CHART CARD (DETALHAMENTO) */}
+            <div className="glass-card" style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white', marginBottom: '1rem', textTransform: 'uppercase', opacity: 0.9 }}>
+                Detalhes Detalhados
               </h3>
               <div style={{ flex: 1, minHeight: 0 }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -220,85 +220,31 @@ export default function DashboardNexusFinal() {
                       {data.topDespesas.map((e: any, index) => <Cell key={index} fill={e.color} />)}
                     </Pie>
                     <Tooltip 
-                      contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '12px' }}
+                      contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '14px' }}
                       itemStyle={{ color: 'white' }}
+                      formatter={(val: number) => `R$ ${val.toLocaleString('pt-BR')}`}
                     />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* 1.5. NEW HORIZONTAL BAR CHART (ANÁLISE FÁCIL) */}
-            <div className="glass-card" style={{ width: '22%', padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'white', marginBottom: '1rem', textTransform: 'uppercase', opacity: 0.8 }}>
+            {/* 2. HORIZONTAL BAR CHART (ANÁLISE DE REGISTROS) */}
+            <div className="glass-card" style={{ flex: 2, padding: '1.5rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white', marginBottom: '1.5rem', textTransform: 'uppercase', opacity: 0.9 }}>
                 Análise de Registros
               </h3>
               <div style={{ flex: 1, width: '100%', overflow: 'hidden' }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart layout="vertical" data={data.topDespesas.slice(0, 4)} margin={{ top: 0, right: 10, left: -10, bottom: 0 }}>
+                  <BarChart layout="vertical" data={data.topDespesas.slice(0, 6)} margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
                     <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} stroke="#94a3b8" fontSize={11} width={80} tickFormatter={(val) => val.length > 12 ? val.substring(0,12)+'...' : val} />
-                    <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ background: '#0f172a', border: 'none', fontSize: '12px', borderRadius: '8px' }} formatter={(val: number) => `R$ ${val.toLocaleString('pt-BR')}`} />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={18}>
+                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} stroke="#94a3b8" fontSize={14} width={130} tickFormatter={(val) => val.length > 20 ? val.substring(0,20)+'...' : val} />
+                    <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ background: '#0f172a', border: 'none', fontSize: '14px', borderRadius: '8px', padding: '10px' }} formatter={(val: number) => `R$ ${val.toLocaleString('pt-BR')}`} />
+                    <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={26}>
                       {data.topDespesas.map((e: any, i) => <Cell key={i} fill={e.color} />)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* 2. LINE CHART CARD (EVOLUÇÃO) */}
-            <div className="glass-card" style={{ flex: 2, padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <h3 style={{ fontSize: '0.75rem', fontWeight: 700, color: 'white', marginBottom: '0.8rem', textTransform: 'uppercase', opacity: 0.8 }}>
-                Evolução Semanal
-              </h3>
-              <div style={{ flex: 1, width: '100%' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={sparklineData}>
-                    <defs>
-                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <Area 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="#0ea5e9" 
-                      fillOpacity={1}
-                      fill="url(#areaGrad)"
-                      strokeWidth={2} 
-                    />
-                    <Tooltip 
-                      contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '10px' }}
-                      itemStyle={{ color: 'white' }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* 3. BAR CHART CARD (COMPARATIVO) */}
-            <div className="glass-card" style={{ width: '25%', padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <h3 style={{ fontSize: '0.75rem', fontWeight: 700, color: 'white', marginBottom: '0.8rem', textTransform: 'uppercase', opacity: 0.8 }}>
-                Fluxo
-              </h3>
-              <div style={{ flex: 1, width: '100%' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={[
-                    { name: 'Receita', val: data.entradas, color: '#10b981' },
-                    { name: 'Despesa', val: data.saidas, color: '#ef4444' }
-                  ]}>
-                    <Bar dataKey="val" radius={[4, 4, 0, 0]}>
-                      <Cell fill="#10b981" />
-                      <Cell fill="#ef4444" />
-                    </Bar>
-                    <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ background: '#0f172a', border: 'none', fontSize: '10px' }} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-                <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Margem: {data.entradas > 0 ? ((1 - data.saidas/data.entradas)*100).toFixed(0) : 0}%</span>
               </div>
             </div>
           </div>
