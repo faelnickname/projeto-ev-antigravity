@@ -177,32 +177,35 @@ CONTAS: ${contas?.map(c => `${c.nome}: R$ ${c.saldo}`).join(', ') || 'Nenhuma'}
 
     // Salva transação se a IA detectou uma transação
     if (ia.intencao === 'transacao' && ia.dados) {
-      const d = ia.dados;
-      try {
-        const { error: insertError } = await supabase.from('transacoes').insert({
-          descricao: d.descricao,
-          categoria: d.categoria || 'Outros',
-          subcategoria: d.subcategoria,
-          valor: d.tipo === 'inc' ? Math.abs(Number(d.valor)) : -Math.abs(Number(d.valor)),
-          tipo: d.tipo === 'inc' ? 'entrada' : 'saida',
-          id_whatsapp: FINAL_DB_ID,
-          status: 'confirmado'
-        });
-        
-        if (insertError) {
-          log('ERROR', `Falha ao inserir no banco: ${insertError.message}`);
-          // Tenta logar a falha em uma entrada de log para depuração
-          await supabase.from('logs').insert({
-            numero_whatsapp: 'SYSTEM_ERROR',
-            mensagem_entrada: bodyText,
-            resposta_enviada: `ERRO BD: ${insertError.message}`,
-            tipo_acao: 'database_error'
+      const transacoesLista = Array.isArray(ia.dados) ? ia.dados : [ia.dados];
+      
+      for (const d of transacoesLista) {
+        try {
+          const { error: insertError } = await supabase.from('transacoes').insert({
+            descricao: d.descricao || 'Despesa/Receita',
+            categoria: d.categoria || 'Outros',
+            subcategoria: d.subcategoria,
+            valor: d.tipo === 'inc' ? Math.abs(Number(d.valor)) : -Math.abs(Number(d.valor)),
+            tipo: d.tipo === 'inc' ? 'inc' : 'exp',
+            id_whatsapp: FINAL_DB_ID,
+            status: 'confirmado'
           });
-        } else {
-          log('INFO', `Transação registrada: ${d.descricao} R$ ${d.valor}`);
+          
+          if (insertError) {
+            log('ERROR', `Falha ao inserir no banco: ${insertError.message}`);
+            // Tenta logar a falha em uma entrada de log para depuração
+            await supabase.from('logs').insert({
+              numero_whatsapp: 'SYSTEM_ERROR',
+              mensagem_entrada: bodyText,
+              resposta_enviada: `ERRO BD: ${insertError.message}`,
+              tipo_acao: 'database_error'
+            });
+          } else {
+            log('INFO', `Transação registrada: ${d.descricao} R$ ${d.valor}`);
+          }
+        } catch (dbErr: any) {
+          log('ERROR', `Exceção ao inserir transação: ${dbErr.message}`);
         }
-      } catch (dbErr: any) {
-        log('ERROR', `Exceção ao inserir transação: ${dbErr.message}`);
       }
     }
 
@@ -234,10 +237,9 @@ CONTAS: ${contas?.map(c => `${c.nome}: R$ ${c.saldo}`).join(', ') || 'Nenhuma'}
       }
     });
 
-    const querAcesso = /painel|plataforma|acender|link|ver os dados|site|dashboard/i.test(bodyText);
-    const isAnalise = ia.intencao === 'pergunta' || ia.intencao === 'consulta';
+    const querAcesso = /plataforma/i.test(bodyText);
 
-    if (querAcesso || isAnalise || /link/i.test(respostaFinal)) {
+    if (querAcesso) {
       if (!respostaFinal.includes('https://projetoev.com.br')) {
         respostaFinal += `\n\n🔗 *Acesso à Plataforma:* https://projetoev.com.br`;
       }
