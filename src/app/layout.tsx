@@ -32,11 +32,11 @@ export default function RootLayout({
           <aside className="sidebar desktop-only" style={{ background: '#0f172a' }}>
             <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
               
-              {/* Premium Nexo Inline SVG Logo */}
+              {/* Premium Nexus Inline SVG Logo */}
               <div style={{ marginBottom: '0.8rem' }}>
-                <svg width="150" height="45" viewBox="0 0 150 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="170" height="45" viewBox="0 0 170 45" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <defs>
-                    <linearGradient id="nexoGrad" x1="0" y1="0" x2="1" y2="1">
+                    <linearGradient id="nexusGrad" x1="0" y1="0" x2="1" y2="1">
                       <stop offset="0%" stopColor="#38bdf8" />
                       <stop offset="100%" stopColor="#10b981" />
                     </linearGradient>
@@ -51,13 +51,13 @@ export default function RootLayout({
                   
                   {/* Glowing N Symbol */}
                   <g filter="url(#neonGlowLogo)">
-                    <path d="M 8 34 L 8 10 L 26 34 L 26 10" stroke="url(#nexoGrad)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M 8 34 L 8 10 L 26 34 L 26 10" stroke="url(#nexusGrad)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
                     <circle cx="26" cy="10" r="3.5" fill="#10b981" />
                     <circle cx="8" cy="34" r="3.5" fill="#38bdf8" />
                   </g>
                   
-                  {/* Nexo Text */}
-                  <text x="42" y="31" fill="#ffffff" fontFamily="system-ui, -apple-system, sans-serif" fontSize="24" fontWeight="900" letterSpacing="0.1em">NEXO</text>
+                  {/* Nexus Text */}
+                  <text x="42" y="31" fill="#ffffff" fontFamily="system-ui, -apple-system, sans-serif" fontSize="24" fontWeight="900" letterSpacing="0.1em">NEXUS</text>
                 </svg>
               </div>
 
