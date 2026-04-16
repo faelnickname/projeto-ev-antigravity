@@ -136,7 +136,7 @@ export default function CartoesPage() {
                <h3 className="card-title" style={{ marginBottom: '1.5rem' }}>CARTÕES DIGITAIS ATIVOS</h3>
                <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem', paddingBottom: '1rem' }}>
-                    {cartoes.map(cartao => {
+                    {cartoes.length > 0 ? cartoes.map(cartao => {
                        const progresso = (cartao.fatura_atual / cartao.limite) * 100;
                        const cardColor = cartao.cor_hex || '#38bdf8';
 
@@ -175,7 +175,13 @@ export default function CartoesPage() {
                            </div>
                          </div>
                        );
-                    })}
+                    }) : (
+                      <div className="glass-card" style={{ gridColumn: '1 / -1', padding: '3rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                        <CreditCard size={48} style={{ color: '#64748b', opacity: 0.3, marginBottom: '1rem' }} />
+                        <h4 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>NENHUM CARTÃO CADASTRADO</h4>
+                        <p style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 600 }}>Você ainda não sincronizou cartões de crédito. Clique em "Novo Ativo" para começar.</p>
+                      </div>
+                    )}
                   </div>
                </div>
             </div>

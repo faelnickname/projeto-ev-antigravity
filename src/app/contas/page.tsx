@@ -9,7 +9,7 @@ import { dataService } from '@/lib/dataService';
 
 export default function ContasPage() {
   const [loading, setLoading] = useState(true);
-  const [contas, setContas] = useState<any[]>(MOCK_CONTAS);
+  const [contas, setContas] = useState<any[]>([]);
   const [showValues, setShowValues] = useState(true);
   const [recarregando, setRecarregando] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
@@ -19,14 +19,10 @@ export default function ContasPage() {
     try {
       setRecarregando(true);
       const data = await dataService.getAccounts();
-      if (data && data.length > 0) {
-        setContas(data);
-      } else {
-        setContas(MOCK_CONTAS);
-      }
+      setContas(data || []);
     } catch (err) {
       console.error('Erro ao carregar contas:', err);
-      setContas(MOCK_CONTAS);
+      setContas([]);
     } finally {
       setLoading(false);
       setRecarregando(false);
@@ -144,7 +140,7 @@ export default function ContasPage() {
                <h3 className="card-title" style={{ marginBottom: '1.5rem' }}>NODOS BANCÁRIOS CONECTADOS</h3>
                <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '1rem', paddingBottom: '1rem' }}>
-                    {contas.map((conta, i) => (
+                    {contas.length > 0 ? contas.map((conta, i) => (
                       <div key={i} className="glass-card elite-row" style={{ padding: '1.2rem', display: 'flex', alignItems: 'center', gap: '1.2rem', borderLeft: `4px solid ${conta.cor_hex || 'var(--primary)'}` }}>
                          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: `${conta.cor_hex || 'var(--primary)'}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${conta.cor_hex || 'var(--primary)'}30` }}>
                             <Landmark size={24} color={conta.cor_hex || 'var(--primary)'} />
@@ -167,7 +163,13 @@ export default function ContasPage() {
                             <MoreHorizontal size={16} />
                          </button>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="glass-card" style={{ gridColumn: '1 / -1', padding: '3rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                        <Landmark size={48} style={{ color: '#64748b', opacity: 0.3, marginBottom: '1rem' }} />
+                        <h4 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>NENHUM NODO BANCÁRIO DETECTADO</h4>
+                        <p style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 600 }}>Você ainda não sincronizou nenhuma instituição. Adicione sua primeira conta para visualizar os saldos.</p>
+                      </div>
+                    )}
                   </div>
                </div>
              </div>
