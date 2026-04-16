@@ -3,7 +3,7 @@
 import './globals.css';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, PieChart, Calendar, Settings, MessageSquare, Target, CreditCard, Landmark, Briefcase, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, PieChart, Calendar, Settings, MessageSquare, Target, CreditCard, Landmark, Briefcase, ShieldCheck, History } from 'lucide-react';
 
 export default function RootLayout({
   children,
@@ -19,6 +19,7 @@ export default function RootLayout({
     { href: '/coral', label: 'Despesas Coral', icon: Briefcase },
     { href: '/contas', label: 'Contas', icon: Landmark },
     { href: '/cartoes', label: 'Cartões', icon: CreditCard },
+    { href: '/historico', label: 'Histórico', icon: History },
     { href: '/agenda', label: 'Agenda', icon: Calendar },
     { href: '/settings', label: 'Configurações', icon: Settings },
   ];
@@ -54,6 +55,7 @@ export default function RootLayout({
               <Link href="/coral" className={`nav-link ${pathname === '/coral' ? 'active' : ''}`}><Briefcase size={18} /> Despesas Coral</Link>
               <Link href="/contas" className={`nav-link ${pathname === '/contas' ? 'active' : ''}`}><Landmark size={18} /> Contas</Link>
               <Link href="/cartoes" className={`nav-link ${pathname === '/cartoes' ? 'active' : ''}`}><CreditCard size={18} /> Cartões</Link>
+              <Link href="/historico" className={`nav-link ${pathname === '/historico' ? 'active' : ''}`}><History size={18} /> Histórico</Link>
               <Link href="/agenda" className={`nav-link ${pathname === '/agenda' ? 'active' : ''}`}><Calendar size={18} /> Agenda</Link>
               <Link href="/settings" className={`nav-link ${pathname === '/settings' ? 'active' : ''}`}><Settings size={18} /> Configurações</Link>
             </nav>

@@ -167,27 +167,27 @@ function TransicoesContent() {
                <div className="elite-table-container custom-scrollbar" style={{ flex: 1, overflowY: 'auto' }}>
                   <table className="elite-table">
                     <thead>
-                      <tr>
-                        <th>DATA/HORA</th>
-                        <th>DESCRIÇÃO</th>
-                        <th>CATEGORIA</th>
-                        <th>STATUS</th>
-                        <th style={{textAlign:'right'}}>VALOR DO ATIVO</th>
+                      <tr style={{ borderBottom: '2px solid rgba(255,255,255,0.05)' }}>
+                        <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800 }}>DATA/HORA</th>
+                        <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800 }}>DESCRIÇÃO</th>
+                        <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800 }}>CATEGORIA</th>
+                        <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800 }}>STATUS</th>
+                        <th style={{ padding: '1rem', textAlign: 'right', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800 }}>VALOR DO ATIVO</th>
                       </tr>
                     </thead>
                     <tbody>
                       {transacoesFiltradas.map((t, i) => (
-                        <tr key={i} className="elite-row">
-                          <td style={{color: '#64748b', fontSize: '0.7rem', fontWeight: 800}}>{new Date(t.created_at).toLocaleDateString('pt-BR')} {new Date(t.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}</td>
-                          <td style={{fontWeight: 800, fontSize: '0.75rem', color: '#fff'}}>{(t.description || t.descricao || '').toUpperCase()}</td>
-                          <td><span className="elite-badge">{(t.category || 'OUTROS').toUpperCase()}</span></td>
-                          <td>
+                        <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s', cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.02)'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                          <td style={{ padding: '1.2rem 1rem', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>{new Date(t.created_at).toLocaleDateString('pt-BR')} {new Date(t.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}</td>
+                          <td style={{ padding: '1.2rem 1rem', fontWeight: 700, fontSize: '0.9rem', color: '#fff' }}>{(t.description || t.descricao || '').toUpperCase()}</td>
+                          <td style={{ padding: '1.2rem 1rem' }}><span className="elite-badge" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>{(t.category || t.categoria || 'OUTROS').toUpperCase()}</span></td>
+                          <td style={{ padding: '1.2rem 1rem' }}>
                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: (t.tipo === 'inc' || t.tipo === 'receita') ? 'var(--accent)' : 'var(--danger)', boxShadow: `0 0 10px ${(t.tipo === 'inc' || t.tipo === 'receita') ? 'var(--accent)' : 'var(--danger)'}` }}></div>
-                               <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.8)' }}>{(t.tipo === 'inc' || t.tipo === 'receita') ? 'SUCESSO' : 'LIQUIDADO'}</span>
+                               <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'rgba(255,255,255,0.8)' }}>{(t.tipo === 'inc' || t.tipo === 'receita') ? 'SUCESSO' : 'LIQUIDADO'}</span>
                              </div>
                           </td>
-                          <td style={{textAlign:'right', fontWeight: 900, fontSize: '0.9rem', color: (t.tipo === 'inc' || t.tipo === 'receita') ? 'var(--accent)' : '#fff'}}>
+                          <td style={{ padding: '1.2rem 1rem', textAlign:'right', fontWeight: 900, fontSize: '1.05rem', color: (t.tipo === 'inc' || t.tipo === 'receita') ? 'var(--accent)' : '#fff'}}>
                             {(t.tipo === 'inc' || t.tipo === 'receita') ? '+' : '-'} {formatCurrency(Math.abs(t.valor))}
                           </td>
                         </tr>

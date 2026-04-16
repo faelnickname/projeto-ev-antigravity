@@ -162,21 +162,21 @@ export default function CoralPage() {
                   <h3 className="card-title" style={{ marginBottom: '1.2rem' }}>ÚLTIMOS REGISTROS "CORAL"</h3>
                   <div className="elite-table-container custom-scrollbar" style={{ flex: 1, overflowY: 'auto' }}>
                      <table className="elite-table">
-                        <thead>
-                           <tr>
-                              <th>DATA/HORA</th>
-                              <th>SUB-SETOR</th>
-                              <th>DESCRIÇÃO/NOTAS</th>
-                              <th style={{ textAlign: 'right' }}>VALOR</th>
+                        <thead style={{ position: 'sticky', top: 0, background: '#020617', zIndex: 10 }}>
+                           <tr style={{ borderBottom: '2px solid rgba(255,255,255,0.05)' }}>
+                              <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800 }}>DATA/HORA</th>
+                              <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800 }}>SUB-SETOR</th>
+                              <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800 }}>DESCRIÇÃO/NOTAS</th>
+                              <th style={{ padding: '1rem', textAlign: 'right', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800 }}>VALOR</th>
                            </tr>
                         </thead>
                         <tbody>
                            {transacoes.map((t, i) => (
-                              <tr key={i} className="elite-row">
-                                 <td style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 800 }}>{new Date(t.created_at).toLocaleDateString('pt-BR')} {new Date(t.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}</td>
-                                 <td><span className="elite-badge" style={{ color: 'var(--primary)', borderColor: 'rgba(0, 210, 255, 0.2)' }}>{(t.subcategoria || 'Geral').toUpperCase()}</span></td>
-                                 <td style={{ color: '#fff', fontSize: '0.7rem', fontWeight: 800 }}>{(t.descricao || '').toUpperCase()}</td>
-                                 <td style={{ textAlign: 'right', fontWeight: 900, color: '#fff' }}>{formatCurrency(Math.abs(t.valor))}</td>
+                              <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s', cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.02)'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                                 <td style={{ padding: '1.2rem 1rem', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>{new Date(t.created_at).toLocaleDateString('pt-BR')} {new Date(t.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}</td>
+                                 <td style={{ padding: '1.2rem 1rem' }}><span className="elite-badge" style={{ color: 'var(--primary)', borderColor: 'rgba(0, 210, 255, 0.2)', padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>{(t.subcategoria || 'Geral').toUpperCase()}</span></td>
+                                 <td style={{ padding: '1.2rem 1rem', color: '#fff', fontSize: '0.9rem', fontWeight: 700 }}>{(t.descricao || '').toUpperCase()}</td>
+                                 <td style={{ padding: '1.2rem 1rem', textAlign: 'right', fontWeight: 900, fontSize: '1.05rem', color: '#fff' }}>{formatCurrency(Math.abs(t.valor))}</td>
                               </tr>
                            ))}
                         </tbody>

@@ -130,45 +130,45 @@ export async function POST(request: NextRequest) {
 
     if (!bodyText) return new Response('ok', { status: 200 });
 
-    // Rate limit e duplicatas
+    // Rate limit
     if (!verificarRateLimit(FINAL_DB_ID).permitido) {
       await evolutionService.sendMessage(remoteJid, '⚠️ Muitas mensagens. Aguarde um momento.');
       return new Response('ok', { status: 200 });
     }
-    if (verificarDuplicata(FINAL_DB_ID, bodyText)) {
-      return new Response('ok', { status: 200 });
-    }
 
-    // Busca dados financeiros em paralelo
-    const [{ data: transRaw }, { data: contas }, { data: historicoLogs }] = await Promise.all([
-      supabase.from('transacoes').select('valor,tipo,categoria,subcategoria,descricao').eq('id_whatsapp', FINAL_DB_ID).order('created_at', { ascending: false }).limit(40),
+    // Busca dados financeiros em paralelo - Otimizado para não truncar categorias
+    const [
+      { data: transGerais }, 
+      { data: transCoral }, 
+      { data: transFixas }, 
+      { data: contas }, 
+      { data: historicoLogs }
+    ] = await Promise.all([
+      supabase.from('transacoes').select('valor,tipo,categoria,descricao').eq('id_whatsapp', FINAL_DB_ID).not('categoria', 'in', '("Despesa Coral","Despesa Fixa")').order('created_at', { ascending: false }).limit(20),
+      supabase.from('transacoes').select('valor,tipo,categoria,descricao').eq('id_whatsapp', FINAL_DB_ID).eq('categoria', 'Despesa Coral').order('created_at', { ascending: false }).limit(20),
+      supabase.from('transacoes').select('valor,tipo,categoria,descricao').eq('id_whatsapp', FINAL_DB_ID).eq('categoria', 'Despesa Fixa').order('created_at', { ascending: false }).limit(30),
       supabase.from('contas').select('nome,saldo').eq('id_whatsapp', FINAL_DB_ID),
-      supabase.from('logs').select('mensagem_entrada,resposta_enviada').eq('numero_whatsapp', FINAL_DB_ID).order('created_at', { ascending: false }).limit(3)
+      supabase.from('logs').select('mensagem_entrada,resposta_enviada').eq('numero_whatsapp', FINAL_DB_ID).order('created_at', { ascending: false }).limit(5)
     ]);
 
-    const gerais = transRaw?.filter(t => t.categoria !== 'Despesa Coral' && t.categoria !== 'Despesa Fixa').slice(0, 10) || [];
-    const coral  = transRaw?.filter(t => t.categoria === 'Despesa Coral').slice(0, 15) || [];
-    const fixas  = transRaw?.filter(t => t.categoria === 'Despesa Fixa').slice(0, 15) || [];
-
-    let receitas = 0, despesas = 0;
-    transRaw?.forEach(t => {
-      const v = Math.abs(Number(t.valor) || 0);
-      if (t.tipo === 'inc' || t.tipo === 'receita') receitas += v;
-      else despesas += v;
-    });
+    const receitas = transGerais?.filter(t => t.tipo === 'entrada').reduce((acc, t) => acc + Math.abs(Number(t.valor)), 0) || 0;
+    const despesas = transGerais?.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + Math.abs(Number(t.valor)), 0) || 0;
 
     const contexto = `
-SALDO: R$ ${(receitas - despesas).toFixed(2)} | Receitas: R$ ${receitas.toFixed(2)} | Despesas: R$ ${despesas.toFixed(2)}
+SALDO ATUAL: R$ ${(receitas - despesas).toFixed(2)}
+ÚLTIMAS GERAIS: ${transGerais?.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma'}
+DESPESAS CORAL (Últimas 20): ${transCoral?.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma'}
+DESPESAS FIXAS (Últimas 30): ${transFixas?.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma'}
 CONTAS: ${contas?.map(c => `${c.nome}: R$ ${c.saldo}`).join(', ') || 'Nenhuma'}
-ÚLTIMAS TRANSAÇÕES: ${gerais.map(t => `${t.descricao}: R$ ${t.valor} [${t.categoria}]`).join(' | ') || 'Nenhuma'}
-CORAL: ${coral.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma'}
-FIXAS: ${fixas.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma'}
 `.trim();
 
-    const historico = historicoLogs?.reverse().flatMap(l => ([
-      { role: 'user' as const, content: l.mensagem_entrada },
-      { role: 'assistant' as const, content: l.resposta_enviada }
-    ])) || [];
+    const historico = (historicoLogs || [])
+      .reverse()
+      .filter(l => !/mint|ynab|pocketguard|spendee|nubank|guiabolso|sheets|excel|planilha/i.test(l.resposta_enviada || ''))
+      .flatMap(l => ([
+        { role: 'user' as const, content: l.mensagem_entrada },
+        { role: 'assistant' as const, content: l.resposta_enviada }
+      ]));
 
     const ia = await processarMensagemAssistente(bodyText, contexto, historico);
     if (!ia?.resposta) throw new Error('IA sem resposta');
@@ -178,16 +178,32 @@ FIXAS: ${fixas.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma
     // Salva transação se a IA detectou uma transação
     if (ia.intencao === 'transacao' && ia.dados) {
       const d = ia.dados;
-      await supabase.from('transacoes').insert({
-        descricao: d.descricao,
-        categoria: d.categoria || 'Outros',
-        subcategoria: d.subcategoria,
-        valor: d.tipo === 'inc' ? Math.abs(d.valor) : -Math.abs(d.valor),
-        tipo: d.tipo === 'inc' ? 'entrada' : 'saida',
-        id_whatsapp: FINAL_DB_ID,
-        status: 'confirmado'
-      });
-      log('INFO', `Transação registrada: ${d.descricao} R$ ${d.valor}`);
+      try {
+        const { error: insertError } = await supabase.from('transacoes').insert({
+          descricao: d.descricao,
+          categoria: d.categoria || 'Outros',
+          subcategoria: d.subcategoria,
+          valor: d.tipo === 'inc' ? Math.abs(Number(d.valor)) : -Math.abs(Number(d.valor)),
+          tipo: d.tipo === 'inc' ? 'entrada' : 'saida',
+          id_whatsapp: FINAL_DB_ID,
+          status: 'confirmado'
+        });
+        
+        if (insertError) {
+          log('ERROR', `Falha ao inserir no banco: ${insertError.message}`);
+          // Tenta logar a falha em uma entrada de log para depuração
+          await supabase.from('logs').insert({
+            numero_whatsapp: 'SYSTEM_ERROR',
+            mensagem_entrada: bodyText,
+            resposta_enviada: `ERRO BD: ${insertError.message}`,
+            tipo_acao: 'database_error'
+          });
+        } else {
+          log('INFO', `Transação registrada: ${d.descricao} R$ ${d.valor}`);
+        }
+      } catch (dbErr: any) {
+        log('ERROR', `Exceção ao inserir transação: ${dbErr.message}`);
+      }
     }
 
     // Salva log da conversa
@@ -198,13 +214,33 @@ FIXAS: ${fixas.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma
       tipo_acao: ia.intencao
     });
 
-    // Verifica se deve adicionar o link da plataforma
+    // Limpeza de segurança (Anti-Hallucinação)
     let respostaFinal = ia.resposta;
+    
+    // Se a IA alucinar dizendo que não tem link ou sugerindo outros, nós limpamos
+    const frasesProibidas = [
+      /infelizmente.*link/gi,
+      /não tenho.*link/gi,
+      /não possuo.*link/gi,
+      /recomendo.*planilha/gi,
+      /use.*guiabolso/gi,
+      /use.*sheets/gi,
+      /planilha no google/gi
+    ];
+
+    frasesProibidas.forEach(regex => {
+      if (regex.test(respostaFinal)) {
+        respostaFinal = respostaFinal.replace(regex, "Você pode acessar tudo aqui pela nossa plataforma oficial.");
+      }
+    });
+
     const querAcesso = /painel|plataforma|acender|link|ver os dados|site|dashboard/i.test(bodyText);
     const isAnalise = ia.intencao === 'pergunta' || ia.intencao === 'consulta';
 
-    if (querAcesso || isAnalise) {
-      respostaFinal += `\n\n🔗 *Acesso à Plataforma:* https://projetoev.com.br`;
+    if (querAcesso || isAnalise || /link/i.test(respostaFinal)) {
+      if (!respostaFinal.includes('https://projetoev.com.br')) {
+        respostaFinal += `\n\n🔗 *Acesso à Plataforma:* https://projetoev.com.br`;
+      }
     }
 
     // Responde diretamente na DM do usuário
