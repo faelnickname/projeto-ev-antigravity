@@ -240,12 +240,32 @@ html, body {
 
   .dashboard-grid { gap: 0.6rem !important; }
 
-  /* KPIs - 3 in a row */
-  .kpi-row { display: flex !important; gap: 0.4rem !important; }
-  .kpi-row > div { flex: 1; padding: 0.6rem !important; justify-content: space-between !important; height: 75px !important; }
-  .kpi-row > div > span:first-child { font-size: 0.55rem !important; margin-bottom: 0; }
-  .kpi-value { font-size: 0.9rem !important; font-weight: 800 !important; }
-  .kpi-trend { font-size: 0.5rem !important; }
+  /* KPIs - Saldo Full Width, Entradas/Saidas 50% */
+  .kpi-row { 
+    display: grid !important; 
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important; 
+  }
+  .kpi-row > div { 
+    padding: 0.8rem 1rem !important; 
+    justify-content: space-between !important; 
+    height: auto !important; 
+    min-height: 75px !important;
+  }
+  /* Cartão Saldo (Primeiro) */
+  .kpi-row > div:first-child {
+    grid-column: 1 / -1 !important; /* Ocupa as 2 colunas */
+    min-height: 85px !important;
+    padding: 1rem 1.2rem !important;
+  }
+  /* Textos de Label (Saldo, Entradas, Saídas) */
+  .kpi-row > div > span:first-child { font-size: 0.7rem !important; margin-bottom: 0.2rem; opacity: 0.8; }
+  
+  /* Valores */
+  .kpi-value { font-size: 1.25rem !important; font-weight: 900 !important; }
+  .kpi-row > div:first-child .kpi-value { font-size: 2.1rem !important; letter-spacing: -0.5px; } /* Saldo bem grande */
+  
+  .kpi-trend { font-size: 0.55rem !important; display: none !important; } /* Esconder sparklines no cel p/ caber melhor */
 
   /* Left Panel (Filters) becoming top bar */
   .main-row {
@@ -257,12 +277,12 @@ html, body {
 
   .filter-panel {
     display: flex !important; flex-direction: row !important; align-items: center; justify-content: space-between;
-    gap: 0.4rem !important; padding: 0.3rem 0.5rem !important; min-height: 40px !important; flex-shrink: 0;
+    gap: 0.4rem !important; padding: 0.4rem 0.6rem !important; min-height: 40px !important; flex-shrink: 0;
   }
   .filter-panel .elite-filter-group { margin-bottom: 0 !important; flex: 1; display: flex; align-items: center; }
   .filter-panel .elite-filter-label { display: none !important; }
   .filter-panel .btn-limpar { display: none !important; }
-  .filter-panel button, .filter-panel select { padding: 0.35rem !important; font-size: 0.6rem !important; }
+  .filter-panel button, .filter-panel select { padding: 0.4rem !important; font-size: 0.65rem !important; }
   
   /* Right Panel */
   .right-panel {
@@ -280,12 +300,12 @@ html, body {
   .bar-chart-card { display: none !important; } /* Hidden on mobile */
   
   .recent-container { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-  .recent-title { font-size: 0.65rem !important; margin-bottom: 0.3rem !important; }
-  .recent-grid { display: flex !important; flex-direction: column !important; gap: 0.3rem !important; overflow: hidden; }
-  .recent-grid > div { padding: 0.5rem !important; border-radius: 8px !important; }
+  .recent-title { font-size: 0.75rem !important; margin-bottom: 0.4rem !important; }
+  .recent-grid { display: flex !important; flex-direction: column !important; gap: 0.4rem !important; overflow: hidden; }
+  .recent-grid > div { padding: 0.6rem 0.8rem !important; border-radius: 8px !important; }
   .recent-grid > div:nth-child(n+4) { display: none !important; } /* Show only top 3 on mobile */
   
-  .glass-card { border-radius: 12px !important; }
+  .glass-card { border-radius: 14px !important; }
   
   .bottom-nav {
     display: flex !important; flex-direction: row; justify-content: space-around; align-items: center;
