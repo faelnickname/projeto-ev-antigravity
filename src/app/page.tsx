@@ -207,20 +207,20 @@ export default function DashboardNexusFinal() {
         {/* RIGHT COLUMN: CHARTS & RECENT */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: 0 }}>
           {/* CHARTS ROW: MULTI COCKPIT VIEW */}
-          <div style={{ display: 'flex', gap: '1rem', height: '240px' }}>
+          <div style={{ display: 'flex', gap: '1rem', height: '320px' }}>
             {/* 1. PIE CHART CARD (DETALHAMENTO) - REDUCED */}
             <div className="glass-card" style={{ width: '18%', padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <h3 style={{ fontSize: '0.75rem', fontWeight: 700, color: 'white', marginBottom: '0.4rem', textTransform: 'uppercase', opacity: 0.8 }}>
+              <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'white', marginBottom: '0.4rem', textTransform: 'uppercase', opacity: 0.8 }}>
                 Detalhes
               </h3>
               <div style={{ flex: 1, minHeight: 0 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={data.topDespesas.slice(0, 5)} innerRadius="65%" outerRadius="90%" paddingAngle={5} dataKey="value">
+                    <Pie data={data.topDespesas.slice(0, 5)} innerRadius="65%" outerRadius="95%" paddingAngle={5} dataKey="value">
                       {data.topDespesas.map((e: any, index) => <Cell key={index} fill={e.color} />)}
                     </Pie>
                     <Tooltip 
-                      contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '10px' }}
+                      contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '12px' }}
                       itemStyle={{ color: 'white' }}
                     />
                   </PieChart>
@@ -230,16 +230,16 @@ export default function DashboardNexusFinal() {
 
             {/* 1.5. NEW HORIZONTAL BAR CHART (ANÁLISE FÁCIL) */}
             <div className="glass-card" style={{ width: '22%', padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <h3 style={{ fontSize: '0.75rem', fontWeight: 700, color: 'white', marginBottom: '0.8rem', textTransform: 'uppercase', opacity: 0.8 }}>
+              <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'white', marginBottom: '1rem', textTransform: 'uppercase', opacity: 0.8 }}>
                 Análise de Registros
               </h3>
               <div style={{ flex: 1, width: '100%', overflow: 'hidden' }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart layout="vertical" data={data.topDespesas.slice(0, 4)} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+                  <BarChart layout="vertical" data={data.topDespesas.slice(0, 4)} margin={{ top: 0, right: 10, left: -10, bottom: 0 }}>
                     <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} stroke="#94a3b8" fontSize={9} width={70} tickFormatter={(val) => val.length > 10 ? val.substring(0,10)+'...' : val} />
-                    <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ background: '#0f172a', border: 'none', fontSize: '10px', borderRadius: '8px' }} formatter={(val: number) => `R$ ${val.toLocaleString('pt-BR')}`} />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={12}>
+                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} stroke="#94a3b8" fontSize={11} width={80} tickFormatter={(val) => val.length > 12 ? val.substring(0,12)+'...' : val} />
+                    <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ background: '#0f172a', border: 'none', fontSize: '12px', borderRadius: '8px' }} formatter={(val: number) => `R$ ${val.toLocaleString('pt-BR')}`} />
+                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={18}>
                       {data.topDespesas.map((e: any, i) => <Cell key={i} fill={e.color} />)}
                     </Bar>
                   </BarChart>
