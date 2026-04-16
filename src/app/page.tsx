@@ -196,15 +196,34 @@ export default function DashboardNexusFinal() {
       <div className="dashboard-grid" style={{ gridTemplateColumns: 'minmax(280px, 320px) 1fr', gap: '1rem', flex: 1, marginBottom: 0, minHeight: 0 }}>
         {/* LEFT COLUMN: FILTERS & ACCOUNTS */}
         <div className="glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
+          
           <div className="elite-filter-group">
-            <label className="elite-filter-label" style={{ fontSize: '0.65rem' }}>Tipo de Despesa</label>
+            <label className="elite-filter-label" style={{ fontSize: '0.65rem' }}>VISÃO PRINCIPAL</label>
+            <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '0.2rem' }}>
+              <button 
+                style={{ flex: 1, padding: '0.5rem', fontSize: '0.7rem', fontWeight: 600, color: typeFilter === 'all' ? 'white' : '#64748b', background: typeFilter === 'all' ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s' }}
+                onClick={() => setTypeFilter('all')}
+              >Geral</button>
+              <button 
+                style={{ flex: 1, padding: '0.5rem', fontSize: '0.7rem', fontWeight: 600, color: typeFilter === 'entradas' ? '#10b981' : '#64748b', background: typeFilter === 'entradas' ? 'rgba(16, 185, 129, 0.1)' : 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s' }}
+                onClick={() => setTypeFilter('entradas')}
+              >Entradas</button>
+              <button 
+                style={{ flex: 1, padding: '0.5rem', fontSize: '0.7rem', fontWeight: 600, color: typeFilter === 'saidas' ? '#eab308' : '#64748b', background: typeFilter === 'saidas' ? 'rgba(234, 179, 8, 0.1)' : 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s' }}
+                onClick={() => setTypeFilter('saidas')}
+              >Saídas</button>
+            </div>
+          </div>
+
+          <div className="elite-filter-group">
+            <label className="elite-filter-label" style={{ fontSize: '0.65rem' }}>Filtro de Categoria</label>
             <select 
               className="elite-select" 
               style={{ fontSize: '0.75rem', padding: '0.5rem' }}
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
             >
-              <option value="Selecionar Despesa">Selecionar Despesa</option>
+              <option value="Selecionar Despesa">Todas as Categorias</option>
               <option value="Coral">Despesa Coral</option>
               <option value="Fixa">Despesa Fixa</option>
               <option value="Cartão">Cartão</option>
