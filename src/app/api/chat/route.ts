@@ -114,35 +114,36 @@ export async function POST(request: Request) {
 
       // TRANSAÇÃO
       if (respostaIA.intencao === 'transacao' && respostaIA.dados) {
-        const dados = respostaIA.dados;
-        const confianca = respostaIA.confianca_ia || 0.9;
-        const statusFinal = confianca < 0.8 ? 'pendente' : 'confirmado';
-        const valorFinal = dados.tipo === 'exp' ? -Math.abs(dados.valor) : Math.abs(dados.valor);
+        const transacoesLista = Array.isArray(respostaIA.dados) ? respostaIA.dados : [respostaIA.dados];
+        let hasError = false;
 
-        // Inserção com esquema atualizado
-        const { error: insertError } = await supabase.from('transacoes').insert({
-          descricao: dados.descricao,
-          categoria: dados.categoria || 'Outros',
-          valor: valorFinal,
-          tipo: dados.tipo === 'inc' ? 'inc' : 'exp',
-          status: statusFinal,
-          id_whatsapp: FINAL_DB_ID
-        });
+        for (const dados of transacoesLista) {
+          const confianca = respostaIA.confianca_ia || 0.9;
+          const statusFinal = confianca < 0.8 ? 'pendente' : 'confirmado';
+          const valorFinal = dados.tipo === 'exp' ? -Math.abs(dados.valor) : Math.abs(dados.valor);
 
-        if (insertError) {
-          console.error(`❌ Erro real ao salvar transação via Chat: ${insertError.message}`);
-          return NextResponse.json({ resposta: "Desculpe, tive um erro persistente ao salvar. Verifique se o banco de dados está online." }, { status: 500 });
-        }
-
-        console.log(`💾 Transação salva (Modo: ${insertError ? 'Legado' : 'Elite'}): ${dados.descricao}`);
-
-        if (confianca < 0.8) {
-          return NextResponse.json({ 
-            resposta: `⚠️ Só para confirmar... você quer registrar isso como **${dados.tipo === 'inc' ? 'Ganho' : 'Gasto'}** de **R$ ${Number(dados.valor).toFixed(2)}** em **${dados.categoria}**? (Responda S ou N)`,
-            intencao: 'confirmacao_pendente'
+          // Inserção com esquema atualizado
+          const { error: insertError } = await supabase.from('transacoes').insert({
+            descricao: dados.descricao,
+            categoria: dados.categoria || 'Outros',
+            valor: valorFinal,
+            tipo: dados.tipo === 'inc' ? 'inc' : 'exp',
+            status: statusFinal,
+            id_whatsapp: FINAL_DB_ID
           });
+
+          if (insertError) {
+            console.error(`❌ Erro real ao salvar transação via Chat: ${insertError.message}`);
+            hasError = true;
+          } else {
+            console.log(`💾 Transação salva em lote: ${dados.descricao}`);
+          }
         }
-      } 
+
+        if (hasError) {
+          return NextResponse.json({ resposta: "Aviso: Consegui processar o comando, mas uma ou mais transações falharam ao salvar no banco." }, { status: 500 });
+        }
+      }
       // AGENDA
       else if (respostaIA.intencao === 'agenda' && respostaIA.dados) {
         const dados = respostaIA.dados;
