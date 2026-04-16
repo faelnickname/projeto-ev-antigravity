@@ -56,7 +56,7 @@ export default function DashboardNexusFinal() {
 
     const normalizedTipo = (tipo: string) => {
       const val = String(tipo || '').toLowerCase();
-      if ['entrada', 'inc', 'receita'].includes(val) return 'entrada';
+      if (['entrada', 'inc', 'receita'].includes(val)) return 'entrada';
       return 'saida';
     };
 
