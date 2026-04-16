@@ -8,7 +8,8 @@ import {
 } from 'lucide-react';
 import { 
   Tooltip, ResponsiveContainer, 
-  Cell, PieChart, Pie, LineChart, Line
+  Cell, PieChart, Pie, LineChart, Line,
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis
 } from 'recharts';
 import { supabase } from '@/lib/supabase';
 
@@ -41,6 +42,7 @@ export default function DashboardNexusFinal() {
       const { data: trans } = await supabase
         .from('transacoes')
         .select('tipo, valor, categoria, descricao, created_at')
+        .eq('id_whatsapp', '91831298')
         .order('created_at', { ascending: false });
 
       if (trans) setAllTransactions(trans);
@@ -52,8 +54,14 @@ export default function DashboardNexusFinal() {
   useEffect(() => {
     if (allTransactions.length === 0) return;
 
-    const entradas = allTransactions.filter(t => t.tipo === 'entrada').reduce((acc, t) => acc + (Number(t.valor) || 0), 0);
-    const saidas = allTransactions.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
+    const normalizedTipo = (tipo: string) => {
+      const val = String(tipo || '').toLowerCase();
+      if ['entrada', 'inc', 'receita'].includes(val) return 'entrada';
+      return 'saida';
+    };
+
+    const entradas = allTransactions.filter(t => normalizedTipo(t.tipo) === 'entrada').reduce((acc, t) => acc + (Number(t.valor) || 0), 0);
+    const saidas = allTransactions.filter(t => normalizedTipo(t.tipo) === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
     const saldo = entradas - saidas;
 
     // 2. Fetch Top Despesas (Grouped)
@@ -62,7 +70,7 @@ export default function DashboardNexusFinal() {
       ? allTransactions 
       : allTransactions.filter(t => t.categoria?.toLowerCase().includes(filter.toLowerCase()));
 
-    filteredForChart.filter(t => t.tipo === 'saida').forEach(t => {
+    filteredForChart.filter(t => normalizedTipo(t.tipo) === 'saida').forEach(t => {
       const val = Math.abs(Number(t.valor)) || 0;
       // If filtering by specific category, group by description. Else group by category.
       const key = filter === 'Selecionar Despesa' ? (t.categoria || 'Outros') : (t.descricao || 'Sem descrição');
@@ -74,7 +82,7 @@ export default function DashboardNexusFinal() {
       .sort((a,b) => b.value - a.value);
     
     // Use the actual total of filtered outgoings for percentage
-    const filteredSaidas = filteredForChart.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
+    const filteredSaidas = filteredForChart.filter(t => normalizedTipo(t.tipo) === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
     const totalForPerc = filteredSaidas || 1;
 
     const topDespesasPerc = topDespesas.map((d, i) => ({
@@ -198,31 +206,99 @@ export default function DashboardNexusFinal() {
 
         {/* RIGHT COLUMN: CHARTS & RECENT */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: 0 }}>
-          {/* CHART CARD */}
-          <div className="glass-card" style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white', marginBottom: '1rem' }}>
-              {filter === 'Selecionar Despesa' ? 'Detalhamento' : `Detalhamento: ${filter}`}
-            </h3>
-            <div style={{ display: 'flex', alignItems: 'center', flex: 1, minHeight: 0 }}>
-              <div style={{ width: '40%', height: '100%' }}>
+          {/* CHARTS ROW: MULTI COCKPIT VIEW */}
+          <div style={{ display: 'flex', gap: '1rem', height: '240px' }}>
+            {/* 1. PIE CHART CARD (DETALHAMENTO) - REDUCED */}
+            <div className="glass-card" style={{ width: '18%', padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <h3 style={{ fontSize: '0.75rem', fontWeight: 700, color: 'white', marginBottom: '0.4rem', textTransform: 'uppercase', opacity: 0.8 }}>
+                Detalhes
+              </h3>
+              <div style={{ flex: 1, minHeight: 0 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={data.topDespesas.slice(0, 5)} innerRadius="65%" outerRadius="90%" paddingAngle={4} dataKey="value">
+                    <Pie data={data.topDespesas.slice(0, 5)} innerRadius="65%" outerRadius="90%" paddingAngle={5} dataKey="value">
                       {data.topDespesas.map((e: any, index) => <Cell key={index} fill={e.color} />)}
                     </Pie>
-                    <Tooltip contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '10px' }} />
+                    <Tooltip 
+                      contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '10px' }}
+                      itemStyle={{ color: 'white' }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem', paddingLeft: '1.5rem', overflowY: 'auto', maxHeight: '180px' }}>
-                <span className="elite-filter-label" style={{ fontSize: '0.55rem' }}>{filter === 'Selecionar Despesa' ? 'CATEGORIA' : 'DESPESA'}</span>
-                {data.topDespesas.map((item: any, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.7rem', fontWeight: 600 }}>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: item.color || '#334155' }}></div>
-                    <span style={{ color: '#94a3b8', flex: 1 }}>{item.name}</span>
-                    <span>{item.percent}%</span>
-                  </div>
-                ))}
+            </div>
+
+            {/* 1.5. NEW HORIZONTAL BAR CHART (ANÁLISE FÁCIL) */}
+            <div className="glass-card" style={{ width: '22%', padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <h3 style={{ fontSize: '0.75rem', fontWeight: 700, color: 'white', marginBottom: '0.8rem', textTransform: 'uppercase', opacity: 0.8 }}>
+                Análise de Registros
+              </h3>
+              <div style={{ flex: 1, width: '100%', overflow: 'hidden' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart layout="vertical" data={data.topDespesas.slice(0, 4)} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+                    <XAxis type="number" hide />
+                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} stroke="#94a3b8" fontSize={9} width={70} tickFormatter={(val) => val.length > 10 ? val.substring(0,10)+'...' : val} />
+                    <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ background: '#0f172a', border: 'none', fontSize: '10px', borderRadius: '8px' }} formatter={(val: number) => `R$ ${val.toLocaleString('pt-BR')}`} />
+                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={12}>
+                      {data.topDespesas.map((e: any, i) => <Cell key={i} fill={e.color} />)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* 2. LINE CHART CARD (EVOLUÇÃO) */}
+            <div className="glass-card" style={{ flex: 2, padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <h3 style={{ fontSize: '0.75rem', fontWeight: 700, color: 'white', marginBottom: '0.8rem', textTransform: 'uppercase', opacity: 0.8 }}>
+                Evolução Semanal
+              </h3>
+              <div style={{ flex: 1, width: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={sparklineData}>
+                    <defs>
+                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <Area 
+                      type="monotone" 
+                      dataKey="value" 
+                      stroke="#0ea5e9" 
+                      fillOpacity={1}
+                      fill="url(#areaGrad)"
+                      strokeWidth={2} 
+                    />
+                    <Tooltip 
+                      contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '8px', fontSize: '10px' }}
+                      itemStyle={{ color: 'white' }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* 3. BAR CHART CARD (COMPARATIVO) */}
+            <div className="glass-card" style={{ width: '25%', padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <h3 style={{ fontSize: '0.75rem', fontWeight: 700, color: 'white', marginBottom: '0.8rem', textTransform: 'uppercase', opacity: 0.8 }}>
+                Fluxo
+              </h3>
+              <div style={{ flex: 1, width: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={[
+                    { name: 'Receita', val: data.entradas, color: '#10b981' },
+                    { name: 'Despesa', val: data.saidas, color: '#ef4444' }
+                  ]}>
+                    <Bar dataKey="val" radius={[4, 4, 0, 0]}>
+                      <Cell fill="#10b981" />
+                      <Cell fill="#ef4444" />
+                    </Bar>
+                    <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ background: '#0f172a', border: 'none', fontSize: '10px' }} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+                <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Margem: {data.entradas > 0 ? ((1 - data.saidas/data.entradas)*100).toFixed(0) : 0}%</span>
               </div>
             </div>
           </div>
@@ -231,25 +307,29 @@ export default function DashboardNexusFinal() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
             <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white' }}>Últimos Registros</h3>
             <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.8rem', marginBottom: 0 }}>
-              {data.recentTransactions.map((t: any, i) => (
-                <div key={i} className="glass-card" style={{ padding: '0.8rem', display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: `3px solid ${t.tipo === 'entrada' ? '#0ea5e9' : '#f43f5e'}` }}>
+              {data.recentTransactions.map((t: any, i) => {
+                const tipoStr = String(t.tipo || '').toLowerCase();
+                const isEntrada = ['entrada', 'inc', 'receita'].includes(tipoStr);
+
+                return (
+                <div key={i} className="glass-card" style={{ padding: '0.8rem', display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: `3px solid ${isEntrada ? '#0ea5e9' : '#f43f5e'}` }}>
                   <div style={{ width: '36px', height: '36px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {t.tipo === 'entrada' ? <ArrowUpCircle size={18} color="#0ea5e9" /> : <ArrowDownCircle size={18} color="#f43f5e" />}
+                    {isEntrada ? <ArrowUpCircle size={18} color="#0ea5e9" /> : <ArrowDownCircle size={18} color="#f43f5e" />}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>{t.categoria || 'Geral'}</div>
                     <div style={{ fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '120px' }}>{t.descricao}</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '1rem', fontWeight: 800, color: t.tipo === 'entrada' ? '#0ea5e9' : '#f43f5e' }}>
-                      {t.tipo === 'entrada' ? '+' : '-'} R$ {Number(t.valor).toLocaleString('pt-BR')}
+                    <div style={{ fontSize: '1rem', fontWeight: 800, color: isEntrada ? '#0ea5e9' : '#f43f5e' }}>
+                      {isEntrada ? '+' : '-'} R$ {Math.abs(Number(t.valor)).toLocaleString('pt-BR')}
                     </div>
                     <div style={{ fontSize: '0.55rem', color: '#64748b' }}>
                       {new Date(t.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         </div>
