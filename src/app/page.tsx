@@ -16,6 +16,16 @@ import { supabase } from '@/lib/supabase';
 // Mock Sparkline Data (will use real trend in next iteration)
 const sparklineData = Array.from({ length: 20 }, (_, i) => ({ value: 30 + Math.random() * 40 }));
 
+const getColorForCategory = (name: string, isIncome: boolean = false) => {
+  const n = String(name || '').toLowerCase();
+  if (n.includes('coral')) return '#1d4ed8'; // Azul Escuro
+  if (n.includes('fixa')) return '#b91c1c'; // Vermelho Escuro
+  if (n.includes('lene')) return '#ec4899'; // Rosa
+  if (n.includes('cartão') || n.includes('cartao')) return '#9333ea'; // Roxo
+  if (isIncome) return '#10b981'; // Verde
+  return '#eab308'; // Amarelo
+};
+
 export default function DashboardNexusFinal() {
   const [data, setData] = useState<{
     saldo: number;
@@ -85,10 +95,10 @@ export default function DashboardNexusFinal() {
     const filteredSaidas = filteredForChart.filter(t => normalizedTipo(t.tipo) === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
     const totalForPerc = filteredSaidas || 1;
 
-    const topDespesasPerc = topDespesas.map((d, i) => ({
+    const topDespesasPerc = topDespesas.map((d) => ({
       ...d,
       percent: ((d.value / totalForPerc) * 100).toFixed(1),
-      color: ['#f43f5e', '#fb7185', '#fda4af', '#0ea5e9', '#38bdf8'][i % 5]
+      color: getColorForCategory(d.name, false)
     }));
 
     // Dynamic Period Logic
@@ -137,10 +147,10 @@ export default function DashboardNexusFinal() {
         <div className="glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>Entradas</span>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flex: 1 }}>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#0ea5e9' }}>R$ {data.entradas.toLocaleString('pt-BR')}</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#10b981' }}>R$ {data.entradas.toLocaleString('pt-BR')}</div>
             <div style={{ height: '30px', width: '80px' }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={sparklineData}><Line type="monotone" dataKey="value" stroke="#0ea5e9" strokeWidth={2} dot={false} /></LineChart>
+                <LineChart data={sparklineData}><Line type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} dot={false} /></LineChart>
               </ResponsiveContainer>
             </div>
           </div>
@@ -155,10 +165,10 @@ export default function DashboardNexusFinal() {
             </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flex: 1 }}>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#f43f5e' }}>R$ {data.saidas.toLocaleString('pt-BR')}</div>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#eab308' }}>R$ {data.saidas.toLocaleString('pt-BR')}</div>
             <div style={{ height: '30px', width: '80px' }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={sparklineData}><Line type="monotone" dataKey="value" stroke="#f43f5e" strokeWidth={2} dot={false} /></LineChart>
+                <LineChart data={sparklineData}><Line type="monotone" dataKey="value" stroke="#eab308" strokeWidth={2} dot={false} /></LineChart>
               </ResponsiveContainer>
             </div>
           </div>
@@ -256,18 +266,19 @@ export default function DashboardNexusFinal() {
               {data.recentTransactions.map((t: any, i) => {
                 const tipoStr = String(t.tipo || '').toLowerCase();
                 const isEntrada = ['entrada', 'inc', 'receita'].includes(tipoStr);
+                const displayColor = getColorForCategory(t.categoria, isEntrada);
 
                 return (
-                <div key={i} className="glass-card" style={{ padding: '0.8rem', display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: `3px solid ${isEntrada ? '#0ea5e9' : '#f43f5e'}` }}>
+                <div key={i} className="glass-card" style={{ padding: '0.8rem', display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: `3px solid ${displayColor}` }}>
                   <div style={{ width: '36px', height: '36px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {isEntrada ? <ArrowUpCircle size={18} color="#0ea5e9" /> : <ArrowDownCircle size={18} color="#f43f5e" />}
+                    {isEntrada ? <ArrowUpCircle size={18} color={displayColor} /> : <ArrowDownCircle size={18} color={displayColor} />}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>{t.categoria || 'Geral'}</div>
                     <div style={{ fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '120px' }}>{t.descricao}</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '1rem', fontWeight: 800, color: isEntrada ? '#0ea5e9' : '#f43f5e' }}>
+                    <div style={{ fontSize: '1rem', fontWeight: 800, color: displayColor }}>
                       {isEntrada ? '+' : '-'} R$ {Math.abs(Number(t.valor)).toLocaleString('pt-BR')}
                     </div>
                     <div style={{ fontSize: '0.55rem', color: '#64748b' }}>
