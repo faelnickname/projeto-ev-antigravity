@@ -133,7 +133,7 @@ export default function DashboardNexusFinal() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', height: '100%' }}>
       {/* TOP KPI ROW */}
-      <div className="dashboard-grid" style={{ gridTemplateColumns: '1.2fr 1fr 1fr', gap: '1rem', marginBottom: 0 }}>
+      <div className="dashboard-grid kpi-row" style={{ gap: '1rem', marginBottom: 0 }}>
         {/* SALDO */}
         <div 
           className="glass-card kpi-card-saldo" 
@@ -192,7 +192,7 @@ export default function DashboardNexusFinal() {
       </div>
 
       {/* MAIN ANALYSIS ROW */}
-      <div className="dashboard-grid" style={{ gridTemplateColumns: 'minmax(280px, 320px) 1fr', gap: '1rem', flex: 1, marginBottom: 0, minHeight: 0 }}>
+      <div className="dashboard-grid main-row" style={{ gap: '1rem', flex: 1, marginBottom: 0, minHeight: 0 }}>
         {/* LEFT COLUMN: FILTERS & ACCOUNTS */}
         <div className="glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
           
@@ -252,13 +252,13 @@ export default function DashboardNexusFinal() {
         {/* RIGHT COLUMN: CHARTS & RECENT */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: 0 }}>
           {/* CHARTS ROW: DUAL HIGH-FOCUS VIEW */}
-          <div style={{ display: 'flex', gap: '1rem', height: '320px' }}>
+          <div className="charts-row">
             {/* 1. PIE CHART CARD (DETALHAMENTO) */}
             <div className="glass-card" style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white', marginBottom: '1rem', textTransform: 'uppercase', opacity: 0.9 }}>
                 Detalhes Detalhados
               </h3>
-              <div style={{ flex: 1, minHeight: 0 }}>
+              <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={data.topDespesas.slice(0, 5)} innerRadius="65%" outerRadius="95%" paddingAngle={5} dataKey="value">
@@ -279,7 +279,7 @@ export default function DashboardNexusFinal() {
               <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white', marginBottom: '1.5rem', textTransform: 'uppercase', opacity: 0.9 }}>
                 Análise de Registros
               </h3>
-              <div style={{ flex: 1, width: '100%', overflow: 'hidden' }}>
+              <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart layout="vertical" data={data.topDespesas.slice(0, 6)} margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
                     <XAxis type="number" hide />
@@ -297,7 +297,7 @@ export default function DashboardNexusFinal() {
           {/* ÚLTIMOS REGISTROS (GRID) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
             <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white' }}>Últimos Registros</h3>
-            <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.8rem', marginBottom: 0 }}>
+            <div className="dashboard-grid recent-grid" style={{ gap: '0.8rem', marginBottom: 0 }}>
               {data.recentTransactions.map((t: any, i) => {
                 const tipoStr = String(t.tipo || '').toLowerCase();
                 const isEntrada = ['entrada', 'inc', 'receita'].includes(tipoStr);

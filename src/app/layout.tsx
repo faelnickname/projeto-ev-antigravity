@@ -26,6 +26,15 @@ export default function RootLayout({
 
   return (
     <html lang="pt-BR">
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Nexus" />
+        <meta name="theme-color" content="#0b0e1a" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      </head>
       <body>
         <div className="app-container zero-scroll">
           {/* SIDEBAR NEXUS STYLE */}
