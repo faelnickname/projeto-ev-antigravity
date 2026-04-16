@@ -46,7 +46,6 @@ export default function DashboardNexusFinal() {
   const [filter, setFilter] = useState('Selecionar Despesa');
   const [typeFilter, setTypeFilter] = useState<'all' | 'entradas' | 'saidas'>('all');
   const [loading, setLoading] = useState(true);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
