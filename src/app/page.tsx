@@ -142,8 +142,8 @@ export default function DashboardNexusFinal() {
         >
           <span style={{ fontSize: '0.9rem', fontWeight: 600, opacity: 0.9 }}>Saldo Total</span>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 800 }}>R$ {data.saldo.toLocaleString('pt-BR')}</div>
-            <div style={{ height: '40px', width: '120px' }}>
+            <div className="kpi-value" style={{ fontSize: '2.5rem', fontWeight: 800 }}>R$ {data.saldo.toLocaleString('pt-BR')}</div>
+            <div className="kpi-trend" style={{ height: '40px', width: '120px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={sparklineData}><Line type="monotone" dataKey="value" stroke="white" strokeWidth={2} dot={false} /></LineChart>
               </ResponsiveContainer>
@@ -159,8 +159,8 @@ export default function DashboardNexusFinal() {
         >
           <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>Entradas</span>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flex: 1 }}>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#10b981' }}>R$ {data.entradas.toLocaleString('pt-BR')}</div>
-            <div style={{ height: '30px', width: '80px' }}>
+            <div className="kpi-value" style={{ fontSize: '2rem', fontWeight: 800, color: '#10b981' }}>R$ {data.entradas.toLocaleString('pt-BR')}</div>
+            <div className="kpi-trend" style={{ height: '30px', width: '80px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={sparklineData}><Line type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} dot={false} /></LineChart>
               </ResponsiveContainer>
@@ -181,8 +181,8 @@ export default function DashboardNexusFinal() {
             </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flex: 1 }}>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#eab308' }}>R$ {data.saidas.toLocaleString('pt-BR')}</div>
-            <div style={{ height: '30px', width: '80px' }}>
+            <div className="kpi-value" style={{ fontSize: '1.7rem', fontWeight: 800, color: '#eab308' }}>R$ {data.saidas.toLocaleString('pt-BR')}</div>
+            <div className="kpi-trend" style={{ height: '30px', width: '80px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={sparklineData}><Line type="monotone" dataKey="value" stroke="#eab308" strokeWidth={2} dot={false} /></LineChart>
               </ResponsiveContainer>
@@ -194,7 +194,7 @@ export default function DashboardNexusFinal() {
       {/* MAIN ANALYSIS ROW */}
       <div className="dashboard-grid main-row" style={{ gap: '1rem', flex: 1, marginBottom: 0, minHeight: 0 }}>
         {/* LEFT COLUMN: FILTERS & ACCOUNTS */}
-        <div className="glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
+        <div className="glass-card filter-panel" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
           
           <div className="elite-filter-group">
             <label className="elite-filter-label" style={{ fontSize: '0.65rem' }}>VISÃO PRINCIPAL</label>
@@ -240,6 +240,7 @@ export default function DashboardNexusFinal() {
             </div>
 
             <div 
+              className="btn-limpar"
               style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', cursor: 'pointer', justifyContent: 'center' }}
               onClick={() => { setFilter('Selecionar Despesa'); setTypeFilter('all'); }}
             >
@@ -250,11 +251,11 @@ export default function DashboardNexusFinal() {
         </div>
 
         {/* RIGHT COLUMN: CHARTS & RECENT */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: 0 }}>
+        <div className="right-panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: 0 }}>
           {/* CHARTS ROW: DUAL HIGH-FOCUS VIEW */}
           <div className="charts-row">
             {/* 1. PIE CHART CARD (DETALHAMENTO) */}
-            <div className="glass-card" style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <div className="glass-card pie-chart-card" style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white', marginBottom: '1rem', textTransform: 'uppercase', opacity: 0.9 }}>
                 Detalhes Detalhados
               </h3>
@@ -275,7 +276,7 @@ export default function DashboardNexusFinal() {
             </div>
 
             {/* 2. HORIZONTAL BAR CHART (ANÁLISE DE REGISTROS) */}
-            <div className="glass-card" style={{ flex: 2, padding: '1.5rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <div className="glass-card bar-chart-card" style={{ flex: 2, padding: '1.5rem', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white', marginBottom: '1.5rem', textTransform: 'uppercase', opacity: 0.9 }}>
                 Análise de Registros
               </h3>
@@ -295,8 +296,8 @@ export default function DashboardNexusFinal() {
           </div>
 
           {/* ÚLTIMOS REGISTROS (GRID) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white' }}>Últimos Registros</h3>
+          <div className="recent-container" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            <h3 className="recent-title" style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white' }}>Últimos Registros</h3>
             <div className="dashboard-grid recent-grid" style={{ gap: '0.8rem', marginBottom: 0 }}>
               {data.recentTransactions.map((t: any, i) => {
                 const tipoStr = String(t.tipo || '').toLowerCase();
