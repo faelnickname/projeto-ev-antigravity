@@ -44,6 +44,8 @@ export default function DashboardNexusFinal() {
   });
   const [allTransactions, setAllTransactions] = useState<any[]>([]);
   const [filter, setFilter] = useState('Selecionar Despesa');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'entradas' | 'saidas'>('all');
+  const [loading, setLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -74,15 +76,22 @@ export default function DashboardNexusFinal() {
     const saidas = allTransactions.filter(t => normalizedTipo(t.tipo) === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
     const saldo = entradas - saidas;
 
-    // 2. Fetch Top Despesas (Grouped)
-    const despesasMap: Record<string, number> = {};
-    const filteredForChart = filter === 'Selecionar Despesa' 
-      ? allTransactions 
-      : allTransactions.filter(t => t.categoria?.toLowerCase().includes(filter.toLowerCase()));
+    // 2. Filter & Group
+    const filteredForChart = allTransactions.filter(t => {
+      const isEntrada = normalizedTipo(t.tipo) === 'entrada';
+      
+      if (typeFilter === 'entradas' && !isEntrada) return false;
+      if (typeFilter === 'saidas' && isEntrada) return false;
 
-    filteredForChart.filter(t => normalizedTipo(t.tipo) === 'saida').forEach(t => {
+      if (filter !== 'Selecionar Despesa') {
+        if (!t.categoria?.toLowerCase().includes(filter.toLowerCase())) return false;
+      }
+      return true;
+    });
+
+    const despesasMap: Record<string, number> = {};
+    filteredForChart.forEach(t => {
       const val = Math.abs(Number(t.valor)) || 0;
-      // If filtering by specific category, group by description. Else group by category.
       const key = filter === 'Selecionar Despesa' ? (t.categoria || 'Outros') : (t.descricao || 'Sem descrição');
       despesasMap[key] = (despesasMap[key] || 0) + val;
     });
@@ -91,26 +100,22 @@ export default function DashboardNexusFinal() {
       .map(([name, value]) => ({ name, value }))
       .sort((a,b) => b.value - a.value);
     
-    // Use the actual total of filtered outgoings for percentage
-    const filteredSaidas = filteredForChart.filter(t => normalizedTipo(t.tipo) === 'saida').reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
-    const totalForPerc = filteredSaidas || 1;
+    // Percentage against total visible
+    const filteredTotal = filteredForChart.reduce((acc, t) => acc + (Math.abs(Number(t.valor)) || 0), 0);
+    const totalForPerc = filteredTotal || 1;
 
     const topDespesasPerc = topDespesas.map((d) => ({
       ...d,
       percent: ((d.value / totalForPerc) * 100).toFixed(1),
-      color: getColorForCategory(d.name, false)
+      color: getColorForCategory(d.name, typeFilter === 'entradas')
     }));
 
     // Dynamic Period Logic
-    const filtered = filter === 'Selecionar Despesa' 
-      ? allTransactions 
-      : allTransactions.filter(t => t.categoria?.toLowerCase().includes(filter.toLowerCase()));
-
     let start = '01/01/2024';
     let end = '31/12/2024';
     
-    if (filtered.length > 0) {
-      const dates = filtered.map(t => new Date(t.created_at).getTime()).sort((a,b) => a - b);
+    if (filteredForChart.length > 0) {
+      const dates = filteredForChart.map(t => new Date(t.created_at).getTime()).sort((a,b) => a - b);
       const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
       start = new Date(dates[0]).toLocaleString('pt-BR', options);
       end = new Date(dates[dates.length - 1]).toLocaleString('pt-BR', options);
@@ -121,17 +126,21 @@ export default function DashboardNexusFinal() {
       entradas,
       saidas,
       topDespesas: topDespesasPerc as any,
-      recentTransactions: filtered.slice(0, 4),
+      recentTransactions: filteredForChart.slice(0, 8),
       period: { start, end }
     });
-  }, [allTransactions, filter]);
+  }, [allTransactions, filter, typeFilter]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', height: '100%' }}>
       {/* TOP KPI ROW */}
       <div className="dashboard-grid" style={{ gridTemplateColumns: '1.2fr 1fr 1fr', gap: '1rem', marginBottom: 0 }}>
         {/* SALDO */}
-        <div className="glass-card kpi-card-saldo" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div 
+          className="glass-card kpi-card-saldo" 
+          style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer', opacity: typeFilter === 'all' ? 1 : 0.6, border: typeFilter === 'all' ? '2px solid rgba(255,255,255,0.4)' : '1px solid transparent', transition: 'all 0.2s' }}
+          onClick={() => setTypeFilter('all')}
+        >
           <span style={{ fontSize: '0.9rem', fontWeight: 600, opacity: 0.9 }}>Saldo Total</span>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
             <div style={{ fontSize: '2.5rem', fontWeight: 800 }}>R$ {data.saldo.toLocaleString('pt-BR')}</div>
@@ -144,7 +153,11 @@ export default function DashboardNexusFinal() {
         </div>
 
         {/* ENTRADAS */}
-        <div className="glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column' }}>
+        <div 
+          className="glass-card" 
+          style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', cursor: 'pointer', opacity: typeFilter === 'entradas' ? 1 : 0.6, border: typeFilter === 'entradas' ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.05)', transition: 'all 0.2s' }}
+          onClick={() => setTypeFilter('entradas')}
+        >
           <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>Entradas</span>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flex: 1 }}>
             <div style={{ fontSize: '2rem', fontWeight: 800, color: '#10b981' }}>R$ {data.entradas.toLocaleString('pt-BR')}</div>
@@ -157,7 +170,11 @@ export default function DashboardNexusFinal() {
         </div>
 
         {/* SAÍDAS */}
-        <div className="glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column' }}>
+        <div 
+          className="glass-card" 
+          style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', cursor: 'pointer', opacity: typeFilter === 'saidas' ? 1 : 0.6, border: typeFilter === 'saidas' ? '2px solid #eab308' : '1px solid rgba(255,255,255,0.05)', transition: 'all 0.2s' }}
+          onClick={() => setTypeFilter('saidas')}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>Saídas</span>
             <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 800 }}>
@@ -206,7 +223,7 @@ export default function DashboardNexusFinal() {
 
             <div 
               style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', cursor: 'pointer', justifyContent: 'center' }}
-              onClick={() => setFilter('Selecionar Despesa')}
+              onClick={() => { setFilter('Selecionar Despesa'); setTypeFilter('all'); }}
             >
               <CheckSquare size={14} color="#64748b" />
               <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#64748b' }}>Limpar filtros</span>
