@@ -119,12 +119,15 @@ export async function POST(request: Request) {
 
         for (const dados of transacoesLista) {
           const confianca = respostaIA.confianca_ia || 0.9;
-          const statusFinal = confianca < 0.8 ? 'pendente' : 'confirmado';
+          const isPending = dados.dia_vencimento || dados.descricao?.match(/vence/i) ? true : false;
+          const statusFinal = isPending ? 'a pagar' : (confianca < 0.8 ? 'pendente' : 'confirmado');
           const valorFinal = dados.tipo === 'exp' ? -Math.abs(dados.valor) : Math.abs(dados.valor);
+          const baseDesc = dados.descricao || 'Despesa/Receita';
+          const finalDescricao = dados.dia_vencimento && !baseDesc.match(/Vence/i) ? `${baseDesc} (Vence Dia ${dados.dia_vencimento})` : baseDesc;
 
           // Inserção com esquema atualizado
           const { error: insertError } = await supabase.from('transacoes').insert({
-            descricao: dados.descricao,
+            descricao: finalDescricao,
             categoria: dados.categoria || 'Outros',
             valor: valorFinal,
             tipo: dados.tipo === 'inc' ? 'inc' : 'exp',

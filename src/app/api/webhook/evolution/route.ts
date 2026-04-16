@@ -181,14 +181,18 @@ CONTAS: ${contas?.map(c => `${c.nome}: R$ ${c.saldo}`).join(', ') || 'Nenhuma'}
       
       for (const d of transacoesLista) {
         try {
+          const isPending = d.dia_vencimento || d.descricao?.match(/vence/i) ? true : false;
+          const baseDesc = d.descricao || 'Despesa/Receita';
+          const finalDescricao = d.dia_vencimento && !baseDesc.match(/Vence/i) ? `${baseDesc} (Vence Dia ${d.dia_vencimento})` : baseDesc;
+
           const { error: insertError } = await supabase.from('transacoes').insert({
-            descricao: d.descricao || 'Despesa/Receita',
+            descricao: finalDescricao,
             categoria: d.categoria || 'Outros',
             subcategoria: d.subcategoria,
             valor: d.tipo === 'inc' ? Math.abs(Number(d.valor)) : -Math.abs(Number(d.valor)),
             tipo: d.tipo === 'inc' ? 'inc' : 'exp',
             id_whatsapp: FINAL_DB_ID,
-            status: 'confirmado'
+            status: isPending ? 'a pagar' : 'confirmado'
           });
           
           if (insertError) {

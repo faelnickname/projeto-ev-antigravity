@@ -25,11 +25,11 @@ export async function GET(request: Request) {
     let transacoes: any[] = [];
     const { data: transData, error: transError } = await supabase
       .from('transacoes')
-      .select('valor, tipo, categoria, descricao, created_at, dia_vencimento');
+      .select('valor, tipo, categoria, descricao, created_at, dia_vencimento, status');
       
     if (transError && transError.code === '42703') {
-       console.warn('⚠️ Coluna dia_vencimento não existe. Usando fallback legada.');
-       const { data: fallbackData } = await supabase.from('transacoes').select('valor, tipo, categoria, created_at');
+       console.warn('⚠️ Coluna dia_vencimento não existe. Usando fallback e extração pela descrição.');
+       const { data: fallbackData } = await supabase.from('transacoes').select('valor, tipo, categoria, status, descricao, created_at');
        transacoes = fallbackData || [];
     } else {
        transacoes = transData || [];
@@ -83,7 +83,16 @@ export async function GET(request: Request) {
     const transacoesUnicas = new Map();
     
     for (const t of transacoes) {
-      if (t.dia_vencimento) {
+      if (t.status === 'pago' || t.status === 'liquidado' || t.status === 'recebido') continue;
+
+      let dia = t.dia_vencimento;
+      if (!dia && t.descricao) {
+         const match = t.descricao.match(/Vence Dia (\d+)/i);
+         if (match) dia = parseInt(match[1]);
+      }
+
+      if (dia) {
+         t.dia_vencimento = dia; // Normalize it inside mapping
          transacoesUnicas.set(t.descricao, t);
       }
     }
