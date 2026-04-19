@@ -1,0 +1,9 @@
+[
+  {
+    "id": "init_1",
+    "summary": "Implementação EVE 100%",
+    "description": "Marco final da sincronização e implantação no domínio principal.",
+    "start": { "dateTime": "2026-04-19T10:00:00Z" },
+    "end": { "dateTime": "2026-04-19T11:00:00Z" }
+  }
+]
