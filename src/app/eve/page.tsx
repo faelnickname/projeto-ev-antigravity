@@ -25,6 +25,7 @@ export default function EveCockpit() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const monitorIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const starfieldRef = useRef<HTMLCanvasElement | null>(null);
+  const isMicRef = useRef(false);
 
   // ── INITIALIZATION ──
   useEffect(() => {
@@ -42,7 +43,19 @@ export default function EveCockpit() {
       
       recognitionRef.current.onresult = handleSpeechResult;
       recognitionRef.current.onend = () => {
-          if (isMicActive) recognitionRef.current.start();
+          if (isMicRef.current) {
+            try { recognitionRef.current.start(); } catch(e) {}
+          }
+      };
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech Recognition Error:', event.error);
+        if (event.error === 'not-allowed') {
+          setResponse('⚠️ Permissão de microfone negada. Verifique as configurações do navegador.');
+        } else if (event.error === 'no-speech') {
+          // Normal, just restart or ignore
+        } else {
+          setResponse(`Erro no áudio: ${event.error}`);
+        }
       };
     }
 
@@ -165,14 +178,20 @@ export default function EveCockpit() {
 
   const toggleMic = () => {
     if (isMicActive) {
+      isMicRef.current = false;
       recognitionRef.current?.stop();
       setIsMicActive(false);
       setOrbState('standby');
     } else {
-      recognitionRef.current?.start();
-      setIsMicActive(true);
-      setOrbState('listening');
-      setResponse('Estou ouvindo...');
+      isMicRef.current = true;
+      try {
+        recognitionRef.current?.start();
+        setIsMicActive(true);
+        setOrbState('listening');
+        setResponse('Estou ouvindo...');
+      } catch (e) {
+        console.error('Start error:', e);
+      }
     }
   };
 
