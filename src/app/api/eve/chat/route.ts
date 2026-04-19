@@ -109,10 +109,23 @@ export async function POST(req: Request) {
       response = result.response;
     }
 
-    return NextResponse.json({ response: response.text() });
+    let finalResponse = "";
+    try {
+      finalResponse = response.text();
+    } catch (e) {
+      // Se falhar ao pegar texto (ex: resposta vazia pós-ferramenta), pegamos a última parte de texto disponível
+      const textPart = response.candidates?.[0].content.parts.find(p => p.text);
+      finalResponse = textPart?.text || "Comando processado, Rafa.";
+    }
+
+    return NextResponse.json({ response: finalResponse });
 
   } catch (error: any) {
     console.error('EVE Chat Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Erro no Servidor EVE', 
+      details: error.message,
+      suggestion: 'Verifique se a GOOGLE_API_KEY está correta na Vercel.'
+    }, { status: 500 });
   }
 }
