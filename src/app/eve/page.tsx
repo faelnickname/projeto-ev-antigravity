@@ -216,8 +216,9 @@ export default function EveCockpit() {
         speak(data.response);
         setHistory(prev => [...prev, { role: 'user', parts: [{ text }] }, { role: 'model', parts: [{ text: data.response }] }]);
       }
-    } catch (err) {
-      setResponse('Houve um erro na Matrix, Rafa.');
+    } catch (err: any) {
+      const errorMsg = err.message || 'Erro de conexão';
+      setResponse(`⚠️ Erro: ${errorMsg}. Verifique os logs do servidor.`);
       setOrbState('standby');
     }
   };
