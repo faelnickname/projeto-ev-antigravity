@@ -9,7 +9,10 @@ class GoogleCalendarService {
     private SANDBOX_PATH: string;
 
     constructor() {
-        this.SANDBOX_PATH = path.join(process.cwd(), 'src/data/sandbox-calendar.json');
+        const isVercel = process.env.VERCEL || process.env.NODE_ENV === 'production';
+        this.SANDBOX_PATH = isVercel 
+            ? path.join('/tmp', 'sandbox-calendar.json')
+            : path.join(process.cwd(), 'src/data/sandbox-calendar.json');
         this.init();
     }
 
