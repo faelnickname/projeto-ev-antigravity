@@ -17,44 +17,54 @@ class GoogleCalendarService {
     }
 
     private init() {
-        // No Next.js, procuramos o arquivo na raiz do projeto ou via variável de ambiente
-        const CREDENTIALS_PATH = path.join(process.cwd(), 'service-account.json');
-        
-        if (fs.existsSync(CREDENTIALS_PATH)) {
-            try {
+        try {
+            const CREDENTIALS_PATH = path.join(process.cwd(), 'service-account.json');
+            
+            if (fs.existsSync(CREDENTIALS_PATH)) {
                 this.auth = new google.auth.GoogleAuth({
                     keyFile: CREDENTIALS_PATH,
                     scopes: ['https://www.googleapis.com/auth/calendar'],
                 });
                 this.calendar = google.calendar({ version: 'v3', auth: this.auth });
                 console.log('[Calendar] Google API Initialized ✓');
-            } catch (e: any) {
-                console.error('[Calendar] Auth Error:', e.message);
+            } else {
+                console.warn('[Calendar] service-account.json not found. Using Sandbox Mode.');
+                this.isSandbox = true;
             }
-        } else {
-            console.warn('[Calendar] service-account.json not found. Using Sandbox Mode.');
+        } catch (e) {
+            console.error('[Calendar] Critical Init Error:', e);
             this.isSandbox = true;
-            this.ensureSandboxFile();
         }
     }
 
     private ensureSandboxFile() {
-        const dir = path.dirname(this.SANDBOX_PATH);
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        if (!fs.existsSync(this.SANDBOX_PATH)) {
-            fs.writeFileSync(this.SANDBOX_PATH, JSON.stringify([], null, 2));
+        try {
+            const dir = path.dirname(this.SANDBOX_PATH);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            if (!fs.existsSync(this.SANDBOX_PATH)) {
+                fs.writeFileSync(this.SANDBOX_PATH, JSON.stringify([], null, 2));
+            }
+        } catch (e) {
+            console.error('[Calendar] Sandbox write error:', e);
         }
     }
 
     async listEvents(timeMin: string = new Date().toISOString(), timeMax?: string) {
         if (this.isSandbox) {
-            const data = JSON.parse(fs.readFileSync(this.SANDBOX_PATH, 'utf8'));
-            return data.filter((e: any) => {
-                const start = new Date(e.start.dateTime || e.start.date);
-                if (timeMin && start < new Date(timeMin)) return false;
-                if (timeMax && start > new Date(timeMax)) return false;
-                return true;
-            });
+            try {
+                this.ensureSandboxFile();
+                if (!fs.existsSync(this.SANDBOX_PATH)) return [];
+                const data = JSON.parse(fs.readFileSync(this.SANDBOX_PATH, 'utf8'));
+                return data.filter((e: any) => {
+                    const start = new Date(e.start.dateTime || e.start.date);
+                    if (timeMin && start < new Date(timeMin)) return false;
+                    if (timeMax && start > new Date(timeMax)) return false;
+                    return true;
+                });
+            } catch (e) {
+                console.error('[Calendar] Sandbox Read Error:', e);
+                return [];
+            }
         }
         if (!this.calendar) throw new Error('Calendar service not configured.');
         
