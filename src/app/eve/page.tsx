@@ -211,7 +211,13 @@ export default function EveCockpit() {
             persona: 'Você é a EVE, consultora estratégica do Rafa. Personalidade feminina, direta e eficiente.'
         })
       });
+      
       const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.details || data.error || 'Erro desconhecido no servidor');
+      }
+
       if (data.response) {
         speak(data.response);
         setHistory(prev => [...prev, { role: 'user', parts: [{ text }] }, { role: 'model', parts: [{ text: data.response }] }]);
