@@ -136,26 +136,33 @@ export async function POST(request: NextRequest) {
       return new Response('ok', { status: 200 });
     }
 
-    // Busca dados financeiros em paralelo - Otimizado para não truncar categorias
+    // Busca dados financeiros em paralelo - Otimizado para não truncar saldo
     const [
       { data: transGerais }, 
       { data: transCoral }, 
       { data: transFixas }, 
+      { data: todasTrans },
       { data: contas }, 
       { data: historicoLogs }
     ] = await Promise.all([
       supabase.from('transacoes').select('valor,tipo,categoria,descricao').eq('id_whatsapp', FINAL_DB_ID).not('categoria', 'in', '("Despesa Coral","Despesa Fixa")').order('created_at', { ascending: false }).limit(20),
       supabase.from('transacoes').select('valor,tipo,categoria,descricao').eq('id_whatsapp', FINAL_DB_ID).eq('categoria', 'Despesa Coral').order('created_at', { ascending: false }).limit(20),
       supabase.from('transacoes').select('valor,tipo,categoria,descricao').eq('id_whatsapp', FINAL_DB_ID).eq('categoria', 'Despesa Fixa').order('created_at', { ascending: false }).limit(30),
+      supabase.from('transacoes').select('valor,tipo,categoria').eq('id_whatsapp', FINAL_DB_ID),
       supabase.from('contas').select('nome,saldo').eq('id_whatsapp', FINAL_DB_ID),
       supabase.from('logs').select('mensagem_entrada,resposta_enviada').eq('numero_whatsapp', FINAL_DB_ID).order('created_at', { ascending: false }).limit(5)
     ]);
 
-    const receitas = transGerais?.filter(t => t.tipo === 'entrada').reduce((acc, t) => acc + Math.abs(Number(t.valor)), 0) || 0;
-    const despesas = transGerais?.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + Math.abs(Number(t.valor)), 0) || 0;
+    const normalize = (t: string) => String(t || '').toLowerCase();
+    const isIncome = (t: string) => ['entrada', 'inc', 'receita'].includes(normalize(t));
+    const isExpense = (t: string) => ['saida', 'exp', 'despesa'].includes(normalize(t));
+
+    const receitasTotal = todasTrans?.filter(t => isIncome(t.tipo)).reduce((acc, t) => acc + Math.abs(Number(t.valor)), 0) || 0;
+    const despesasTotal = todasTrans?.filter(t => isExpense(t.tipo)).reduce((acc, t) => acc + Math.abs(Number(t.valor)), 0) || 0;
 
     const contexto = `
-SALDO ATUAL: R$ ${(receitas - despesas).toFixed(2)}
+SALDO ATUAL: R$ ${(receitasTotal - despesasTotal).toFixed(2)}
+ENTRADAS: R$ ${receitasTotal.toFixed(2)} | SAÍDAS: R$ ${despesasTotal.toFixed(2)}
 ÚLTIMAS GERAIS: ${transGerais?.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma'}
 DESPESAS CORAL (Últimas 20): ${transCoral?.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma'}
 DESPESAS FIXAS (Últimas 30): ${transFixas?.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma'}

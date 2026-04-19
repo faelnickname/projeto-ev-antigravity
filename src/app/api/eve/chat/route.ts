@@ -77,19 +77,20 @@ export async function POST(req: Request) {
       for (const part of response.candidates[0].content.parts) {
         if (part.functionCall) {
           const { name, args } = part.functionCall;
-          console.log(`[EVE API] Tool Call: ${name}`, args);
+          const toolArgs = args as any;
+          console.log(`[EVE API] Tool Call: ${name}`, toolArgs);
 
           try {
             let data;
             switch (name) {
               case "listCalendarEvents":
-                data = await googleCalendar.listEvents(args.timeMin as string, args.timeMax as string);
+                data = await googleCalendar.listEvents(toolArgs.timeMin, toolArgs.timeMax);
                 break;
               case "createCalendarEvent":
-                data = await googleCalendar.createEvent(args.summary as string, args.start as string, args.end as string, args.description as string);
+                data = await googleCalendar.createEvent(toolArgs.summary, toolArgs.start, toolArgs.end, toolArgs.description);
                 break;
               case "deleteCalendarEvent":
-                data = await googleCalendar.deleteEvent(args.eventId as string);
+                data = await googleCalendar.deleteEvent(toolArgs.eventId);
                 break;
               default:
                 data = { error: "Ferramenta não encontrada." };

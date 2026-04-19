@@ -125,15 +125,19 @@ async function processarEResponder(
     const coral = transRaw?.filter(t => t.categoria === 'Despesa Coral').slice(0, 15) || [];
     const fixas = transRaw?.filter(t => t.categoria === 'Despesa Fixa').slice(0, 15) || [];
 
-    let receitas = 0, despesas = 0;
+    let receitasTotal = 0, despesasTotal = 0;
+    const normalize = (t: string) => String(t || '').toLowerCase();
+    const isIncome = (t: string) => ['entrada', 'inc', 'receita'].includes(normalize(t));
+    const isExpense = (t: string) => ['saida', 'exp', 'despesa'].includes(normalize(t));
+
     transRaw?.forEach(t => {
       const v = Math.abs(Number(t.valor) || 0);
-      if (t.tipo === 'inc' || t.tipo === 'receita') receitas += v;
-      else despesas += v;
+      if (isIncome(t.tipo)) receitasTotal += v;
+      else if (isExpense(t.tipo)) despesasTotal += v;
     });
 
     const contexto = `
-SALDO: R$ ${(receitas - despesas).toFixed(2)} | Receitas: R$ ${receitas.toFixed(2)} | Despesas: R$ ${despesas.toFixed(2)}
+SALDO: R$ ${(receitasTotal - despesasTotal).toFixed(2)} | Receitas: R$ ${receitasTotal.toFixed(2)} | Despesas: R$ ${despesasTotal.toFixed(2)}
 CONTAS: ${contas?.map(c => `${c.nome}: R$ ${c.saldo}`).join(', ') || 'Nenhuma'}
 ÚLTIMAS TRANSAÇÕES: ${gerais.map(t => `${t.descricao}: R$ ${t.valor} [${t.categoria}]`).join(' | ') || 'Nenhuma'}
 CORAL: ${coral.map(t => `${t.descricao}: R$ ${t.valor}`).join(' | ') || 'Nenhuma'}

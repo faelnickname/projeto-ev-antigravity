@@ -41,11 +41,11 @@ export const dataService = {
     const transactions = await this.getTransactions(phone);
 
     const receitas = transactions
-      .filter(t => t.tipo === 'inc' || t.tipo === 'receita')
+      .filter(t => ['inc', 'receita', 'entrada'].includes(String(t.tipo).toLowerCase()))
       .reduce((sum, t) => sum + Math.abs(Number(t.valor) || 0), 0);
 
     const despesas = transactions
-      .filter(t => t.tipo === 'exp' || t.tipo === 'despesa')
+      .filter(t => ['exp', 'despesa', 'saida'].includes(String(t.tipo).toLowerCase()))
       .reduce((sum, t) => sum + Math.abs(Number(t.valor) || 0), 0);
 
     return {

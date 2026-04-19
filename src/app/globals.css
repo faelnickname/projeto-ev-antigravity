@@ -113,6 +113,16 @@ html, body {
   background: #0b0e1a;
 }
 
+.main-content-full {
+  flex: 1;
+  height: 100vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  background: #0b0e1a;
+}
+
 .page-wrapper {
   flex: 1;
   display: flex;

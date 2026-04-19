@@ -1,12 +1,11 @@
 {
-  "name": "EV Financeira - Inteligência Elite",
-  "short_name": "EV Elite",
-  "description": "Seu agente financeiro de inteligência avançada",
-  "start_url": "/",
+  "name": "NutriMind",
+  "short_name": "NutriMind",
+  "description": "Nutrição inteligente e mente saudável.",
+  "start_url": "/saude",
   "display": "standalone",
-  "background_color": "#0b0f1a",
-  "theme_color": "#00d2ff",
-  "orientation": "portrait",
+  "background_color": "#0b1120",
+  "theme_color": "#10b981",
   "icons": [
     {
       "src": "/icon-192.png",

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import EdgeTTS from 'edge-tts-node';
+import { MsEdgeTTS } from 'edge-tts-node';
 
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<Response> {
   try {
     const { text, voice = 'pt-BR-ThalitaNeural' } = await req.json();
 
@@ -9,14 +9,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
     }
 
-    const tts = new EdgeTTS();
-    await tts.setMetadata(voice, EdgeTTS.OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+    const tts = new MsEdgeTTS({});
+    await tts.setMetadata(voice, MsEdgeTTS.OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
     
     // Converte stream para Buffer para enviar via NextResponse
     const stream = tts.toStream(text, voice);
     const chunks: any[] = [];
     
-    return new Promise((resolve) => {
+    return new Promise<Response>((resolve) => {
         stream.on('data', (chunk) => chunks.push(chunk));
         stream.on('end', () => {
             const buffer = Buffer.concat(chunks);

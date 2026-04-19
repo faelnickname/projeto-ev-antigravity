@@ -68,7 +68,8 @@ export default function DashboardNexusFinal() {
     const normalizedTipo = (tipo: string) => {
       const val = String(tipo || '').toLowerCase();
       if (['entrada', 'inc', 'receita'].includes(val)) return 'entrada';
-      return 'saida';
+      if (['saida', 'exp', 'despesa'].includes(val)) return 'saida';
+      return 'outros';
     };
 
     const entradas = allTransactions.filter(t => normalizedTipo(t.tipo) === 'entrada').reduce((acc, t) => acc + (Number(t.valor) || 0), 0);
